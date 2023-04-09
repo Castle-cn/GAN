@@ -1,7 +1,5 @@
 import torch
-from torch import nn
 from utils import DiscriminatorLoss, GeneratorLoss
-import numpy as np
 from torchvision import transforms
 from model import Generator, Discriminator
 from tqdm import tqdm
@@ -9,9 +7,6 @@ import os
 from torch.utils.data import DataLoader
 from dataset import MnistDataset, NoiseDataset
 
-
-# loss_fn = nn.CrossEntropyLoss()
-# optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
 
 
 # real_dataloader的batch_size和num_batch要和noise_dataloader一致
@@ -123,7 +118,7 @@ def run(gen_model,
 
 
 def main():
-    gen_model = Generator((224, 224))
+    gen_model = Generator((28, 28))
     gen_loss_fn = GeneratorLoss()
     gen_optimizer = torch.optim.Adam(gen_model.parameters(), lr=1e-3)
 
