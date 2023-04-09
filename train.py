@@ -60,8 +60,9 @@ def train_generator(noise_dataloader,
             loss.backward()
             optimizer.step()
             pbar.update(1)
-        loss = loss.item()
-        tqdm.write(f"generator loss: {loss:>7f}")
+            pbar.set_postfix({'loss' : f'{loss.item():>5f}'})
+        # loss = loss.item()
+        # tqdm.write(f"generator loss: {loss:>7f}")
 
 
 def get_dataloader(real_data_root, batch_size):
@@ -155,4 +156,6 @@ if __name__ == '__main__':
                         required=True,
                         help="where the dataset is")
     args = parser.parse_args()
+
+
     main(args.data_root)
