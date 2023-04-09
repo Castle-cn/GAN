@@ -73,7 +73,7 @@ def get_dataloader(real_data_root, batch_size):
                              drop_last=True,
                              pin_memory=True)
 
-    noise_data = NoiseDataset(0, 1, 70000, [28, 28])
+    noise_data = NoiseDataset(0, 1, 70000, [224, 224])
     noise_loader = DataLoader(noise_data,
                               batch_size=batch_size,
                               drop_last=True,
