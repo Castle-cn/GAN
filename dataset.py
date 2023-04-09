@@ -10,7 +10,7 @@ def read_image(image_path):
     with open(image_path, 'rb') as imgpath:
         _, num, rows, cols = struct.unpack('>IIII', imgpath.read(16))
         images = np.fromfile(imgpath, dtype=np.uint8).reshape(num, rows * cols)
-    return rows, cols, images
+    return rows, cols, torch.from_numpy(images)
 
 
 class MnistDataset(Dataset):
