@@ -35,8 +35,8 @@ if __name__ == '__main__':
     # d = [a, b, c]
     # w = torch.cat(d,dim=0)
     # print(w)
-    v_real = torch.log(torch.asarray([1,2,3])).mean()
-    print(v_real)
+    a = torch.asarray([1.1,2.1,3])
+    print(torch.round(a))
 
 # t1 = time.time()
 # # # a = torch.normal(0, 1, size=(70000, 224, 224))
