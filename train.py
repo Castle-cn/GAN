@@ -8,7 +8,6 @@ from torch.utils.data import DataLoader
 from dataset import MnistDataset, NoiseDataset
 
 
-
 # real_dataloader的batch_size和num_batch要和noise_dataloader一致
 def train_discriminator(real_dataloader,
                         noise_dataloader,
@@ -121,19 +120,22 @@ def run(gen_model,
 
 
 def main():
-    gen_model = Generator((28, 28))
-    gen_loss_fn = GeneratorLoss()
-    gen_optimizer = torch.optim.Adam(gen_model.parameters(), lr=1e-3)
-
-    dis_model = Discriminator()
-    dis_loss_fn = DiscriminatorLoss()
-    dis_optimizer = torch.optim.Adam(dis_model.parameters(), lr=1e-3)
+    batch_size = 32
+    lr = 1e-3
 
     device = 'cpu'
     if torch.cuda.is_available():
         device = 'cuda'
 
-    real_loader, noise_loader = get_dataloader(r'/kaggle/input/mnist-dataset', 32)
+    gen_model = Generator((28, 28), batch_size).to(device)
+    gen_loss_fn = GeneratorLoss()
+    gen_optimizer = torch.optim.Adam(gen_model.parameters(), lr=lr)
+
+    dis_model = Discriminator().to(device)
+    dis_loss_fn = DiscriminatorLoss()
+    dis_optimizer = torch.optim.Adam(dis_model.parameters(), lr=lr)
+
+    real_loader, noise_loader = get_dataloader(r'E:\desktop\mnist', batch_size=batch_size)
 
     save_model_path = 'model'
 

@@ -11,8 +11,7 @@ class MnistDataset(Dataset):
     def __init__(self, data_root, transform=None):
         self.train_img_dir = os.path.join(data_root, 'train-images.idx3-ubyte')
         self.test_img_dir = os.path.join(data_root, 't10k-images.idx3-ubyte')
-        self.images = torch.cat(self.run_pool(), dim=0)
-        print(self.images.shape)
+        self.images = np.concatenate(self.run_pool(), axis=0)
         self.transform = transform
 
     # 获取数据集大小
@@ -31,7 +30,7 @@ class MnistDataset(Dataset):
         with open(image_path, 'rb') as imgpath:
             _, num, rows, cols = struct.unpack('>IIII', imgpath.read(16))
             images = np.fromfile(imgpath, dtype=np.uint8).reshape(num, rows * cols)
-        return torch.from_numpy(images)
+        return images
 
     def run_pool(self):
         cpu_worker_num = 4
@@ -48,6 +47,7 @@ class NoiseDataset(Dataset):
         self.img_size = img_size
         self.nums = nums
         self.images = torch.cat(self.run_pool(), dim=0)
+        self.images = self.images[:, None, ...]
 
     def __len__(self):
         return len(self.images)
