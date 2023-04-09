@@ -5,6 +5,7 @@ from model import Generator, Discriminator
 from tqdm import tqdm
 import os
 from torch.utils.data import DataLoader
+import argparse
 from dataset import MnistDataset, NoiseDataset
 
 
@@ -119,7 +120,7 @@ def run(gen_model,
                    os.path.join(save_model_path, f'dis_model_weights_{t + 1}.pth'))
 
 
-def main():
+def main(data_root):
     batch_size = 32
     lr = 1e-3
 
@@ -135,7 +136,7 @@ def main():
     dis_loss_fn = DiscriminatorLoss()
     dis_optimizer = torch.optim.Adam(dis_model.parameters(), lr=lr)
 
-    real_loader, noise_loader = get_dataloader(r'E:\desktop\mnist', batch_size=batch_size)
+    real_loader, noise_loader = get_dataloader(data_root, batch_size=batch_size)
 
     save_model_path = 'model'
 
@@ -148,4 +149,10 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data_root',
+                        type=str,
+                        required=True,
+                        help="where the dataset is")
+    args = parser.parse_args()
+    main(args.data_root)
