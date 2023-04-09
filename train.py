@@ -130,7 +130,7 @@ def main():
     if torch.cuda.is_available():
         device = 'cuda'
 
-    real_loader, noise_loader = get_dataloader('E:\desktop\mnist', 32)
+    real_loader, noise_loader = get_dataloader('/kaggle/input/mnist-dataset', 32)
     save_model_path = 'model'
 
     run(gen_model, gen_loss_fn, gen_optimizer,
