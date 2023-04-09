@@ -17,5 +17,5 @@ class GeneratorLoss(nn.Module):
         super().__init__()
 
     def forward(self, gen_img_score):
-        v_gen = torch.log(1 - gen_img_score).mean()
+        v_gen = torch.log(gen_img_score).mean()
         return -v_gen
