@@ -128,7 +128,7 @@ def run(gen_model,
                    os.path.join(save_model_path, f'dis_model_weights_{t + 1}.pth'))
 
 
-def main(data_root):
+def main(data_root, t_epochs, d_epochs, g_epochs):
     batch_size = 32
     lr = 1e-3
 
@@ -151,7 +151,7 @@ def main(data_root):
     run(gen_model, gen_loss_fn, gen_optimizer,
         dis_model, dis_loss_fn, dis_optimizer,
         real_loader, noise_loader,
-        30, 10, 2,
+        t_epochs, d_epochs, g_epochs,
         save_model_path,
         device)
 
@@ -162,6 +162,19 @@ if __name__ == '__main__':
                         type=str,
                         required=True,
                         help="where the dataset is")
+
+    parser.add_argument('--t_epochs',
+                        type=int,
+                        default=30)
+
+    parser.add_argument('--d_epochs',
+                        type=int,
+                        default=5)
+
+    parser.add_argument('--g_epochs',
+                        type=int,
+                        default=3)
+
     args = parser.parse_args()
 
-    main(args.data_root)
+    main(args.data_root, args.t_epochs, args.d_epochs, args.g_epochs)
