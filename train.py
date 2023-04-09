@@ -66,6 +66,7 @@ def train_generator(noise_dataloader,
             loss.backward()
             optimizer.step()
             pbar.update(1)
+            pbar.set_postfix(loss=f'{loss.item():>5f}')
 
         loss = loss.item()
         tqdm.write(f"generator loss: {loss:>7f}")
