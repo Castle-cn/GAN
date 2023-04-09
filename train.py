@@ -72,12 +72,15 @@ def get_dataloader(real_data_root, batch_size):
                              batch_size=batch_size,
                              drop_last=True,
                              pin_memory=True)
+    print('real data has been loaded over!!')
 
-    noise_data = NoiseDataset(0, 1, 70000, [224, 224])
+    noise_data = NoiseDataset(0, 1, 70000, [64, 64])
     noise_loader = DataLoader(noise_data,
                               batch_size=batch_size,
                               drop_last=True,
                               pin_memory=True)
+    print('noise data has been loaded over!!')
+
     return real_loader, noise_loader
 
 
@@ -130,7 +133,8 @@ def main():
     if torch.cuda.is_available():
         device = 'cuda'
 
-    real_loader, noise_loader = get_dataloader('/kaggle/input/mnist-dataset', 32)
+    real_loader, noise_loader = get_dataloader(r'/kaggle/input/mnist-dataset', 32)
+
     save_model_path = 'model'
 
     run(gen_model, gen_loss_fn, gen_optimizer,
