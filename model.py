@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 from torchvision import models
-
+import torch.nn.functional as F
 from torch import nn
 
 
@@ -89,7 +89,7 @@ class ResNet(nn.Module):
             nn.AdaptiveAvgPool2d(1),
             nn.Flatten(),
             nn.Linear(block.expension * 512, classes_nums),
-            nn.Softmax(dim=1)
+            # nn.Softmax(dim=1)
         )
 
     def make_layers(self, block, block_nums, in_channels, out_channels, stride):
@@ -122,16 +122,19 @@ class Generator(nn.Module):
     # 输入x是随机噪声，大小为224*224
     def forward(self, x):
         x = self.generator(x)  # 输出的就是图片打平后
+        x = (F.normalize(x, dim=1) * 255 - 0.1307) / 0.3081
         return x.reshape((self.batch_size, 1, self.H, self.W))
 
 
 class Discriminator(nn.Module):
     def __init__(self):
         super().__init__()
+        self.sigmoid = nn.Sigmoid()
         self.discriminator = ResNet(BuildingBlock, [2, 2, 2, 2], 1, 1)
 
     def forward(self, x):
         x = self.discriminator(x)
-        return x    #x is a scalar
+        x = self.sigmoid(x)
+        return x  # x is a scalar
 
 # gen_model = Generator((28, 28))

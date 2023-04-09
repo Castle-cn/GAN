@@ -7,6 +7,7 @@ import os
 from torch.utils.data import DataLoader
 import argparse
 from dataset import MnistDataset, NoiseDataset
+import sys
 
 
 # real_dataloader的batch_size和num_batch要和noise_dataloader一致
@@ -26,7 +27,10 @@ def train_discriminator(real_dataloader,
             # Compute prediction error
             gen = g_model(noise)
             gen_img_score = d_model(gen)
+            # print(gen_img_score)
             real_img_score = d_model(real)
+            # print(real_img_score)
+            # sys.exit()
             loss = loss_fn(real_img_score, gen_img_score)
 
             # Backpropagation
@@ -34,6 +38,8 @@ def train_discriminator(real_dataloader,
             loss.backward()
             optimizer.step()
             pbar.update(1)
+            pbar.set_postfix(loss=f'{loss.item():>5f}')
+
         loss = loss.item()
         tqdm.write(f"discriminator loss: {loss:>7f}")
 
@@ -60,9 +66,9 @@ def train_generator(noise_dataloader,
             loss.backward()
             optimizer.step()
             pbar.update(1)
-            pbar.set_postfix({'loss' : f'{loss.item():>5f}'})
-        # loss = loss.item()
-        # tqdm.write(f"generator loss: {loss:>7f}")
+
+        loss = loss.item()
+        tqdm.write(f"generator loss: {loss:>7f}")
 
 
 def get_dataloader(real_data_root, batch_size):
@@ -144,7 +150,7 @@ def main(data_root):
     run(gen_model, gen_loss_fn, gen_optimizer,
         dis_model, dis_loss_fn, dis_optimizer,
         real_loader, noise_loader,
-        30, 30, 5,
+        30, 10, 2,
         save_model_path,
         device)
 
@@ -156,6 +162,5 @@ if __name__ == '__main__':
                         required=True,
                         help="where the dataset is")
     args = parser.parse_args()
-
 
     main(args.data_root)
