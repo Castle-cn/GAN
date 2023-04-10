@@ -40,7 +40,7 @@ class Model:
         self.device = device
         self.lr = 2e-3
 
-        self.g_model = Generator(100, 28 * 28).to(device)
+        self.g_model = Generator(100).to(device)
         self.g_loss_fn = GeneratorLoss()
         self.g_optimizer = torch.optim.Adam(self.g_model.parameters(), lr=self.lr)
 

@@ -1,57 +1,64 @@
 from torch import nn
 import torch
-
+from torch.nn import functional as F
 
 class Generator(nn.Module):
-    def __init__(self, g_input_dim, g_output_dim):
+
+    def __init__(self, input_size, hidden_dim=32, output_size=784):
         super(Generator, self).__init__()
-        self.stack = nn.Sequential(
-            nn.Linear(g_input_dim, 256),
-            nn.BatchNorm1d(256),
-            nn.LeakyReLU(),
 
-            nn.Linear(256, 512),
-            nn.BatchNorm1d(512),
-            nn.LeakyReLU(),
+        # define hidden linear layers
+        self.fc1 = nn.Linear(input_size, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, hidden_dim * 2)
+        self.fc3 = nn.Linear(hidden_dim * 2, hidden_dim * 4)
 
-            nn.Linear(512, 1024),
-            nn.BatchNorm1d(1024),
-            nn.LeakyReLU(),
+        # final fully-connected layer
+        self.fc4 = nn.Linear(hidden_dim * 4, output_size)
 
-            nn.Linear(1024, g_output_dim),
-            nn.Tanh(),
-            nn.BatchNorm1d(g_output_dim)
-        )
+        # dropout layer
+        self.dropout = nn.Dropout(0.3)
 
-    # forward method
     def forward(self, x):
-        x = self.stack(x)
-        return x
+        # all hidden layers
+        x = F.leaky_relu(self.fc1(x), 0.2)  # (input, negative_slope=0.2)
+        x = self.dropout(x)
+        x = F.leaky_relu(self.fc2(x), 0.2)
+        x = self.dropout(x)
+        x = F.leaky_relu(self.fc3(x), 0.2)
+        x = self.dropout(x)
+        # final layer with tanh applied
+        out = torch.tanh(self.fc4(x))
+        # out = F.normalize(x)
 
+        return out
 
 class Discriminator(nn.Module):
-    def __init__(self, d_input_dim):
+
+    def __init__(self, d_input_dim, hidden_dim=32, output_size=1):
         super(Discriminator, self).__init__()
 
-        self.stack = nn.Sequential(
-            nn.Flatten(),
-            nn.Linear(d_input_dim, 1024),
-            nn.BatchNorm1d(1024),
-            nn.LeakyReLU(),
+        # define hidden linear layers
+        self.fc1 = nn.Linear(d_input_dim, hidden_dim * 4)
+        self.fc2 = nn.Linear(hidden_dim * 4, hidden_dim * 2)
+        self.fc3 = nn.Linear(hidden_dim * 2, hidden_dim)
 
-            nn.Linear(1024, 512),
-            nn.BatchNorm1d(512),
-            nn.LeakyReLU(),
+        # final fully-connected layer
+        self.fc4 = nn.Linear(hidden_dim, output_size)
 
-            nn.Linear(512, 256),
-            nn.BatchNorm1d(256),
-            nn.LeakyReLU(),
+        # dropout layer
+        self.dropout = nn.Dropout(0.3)
 
-            nn.Linear(256, 1),
-            nn.Sigmoid()
-        )
-
-    # forward method
     def forward(self, x):
-        x = self.stack(x)
-        return x
+        # flatten image
+        x = x.view(-1, 28 * 28)
+        # all hidden layers
+        x = F.leaky_relu(self.fc1(x), 0.2)  # (input, negative_slope=0.2)
+        x = self.dropout(x)
+        x = F.leaky_relu(self.fc2(x), 0.2)
+        x = self.dropout(x)
+        x = F.leaky_relu(self.fc3(x), 0.2)
+        x = self.dropout(x)
+        # final layer
+        out = torch.sigmoid(self.fc4(x))
+
+        return out
