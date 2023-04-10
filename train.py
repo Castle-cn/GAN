@@ -52,14 +52,7 @@ class Model:
                 target_ones = torch.ones(self.loader.batch_size, 1).to(self.device)
                 target_zeros = torch.zeros(self.loader.batch_size, 1).to(self.device)
 
-                # 训练generator
-                self.d_model.eval()
-                self.g_model.train()
                 fake_imgs = self.g_model(noise)
-                self.g_optimizer.zero_grad()
-                g_loss = self.loss_fn(self.d_model(fake_imgs), target_ones)
-                g_loss.backward()
-                self.g_optimizer.step()
 
                 # 训练discriminator
                 self.d_model.train()
@@ -69,6 +62,14 @@ class Model:
                          0.5 * (self.loss_fn(self.d_model(fake_imgs.detach()), target_zeros))
                 d_loss.backward()
                 self.d_optimizer.step()
+
+                # 训练generator
+                self.d_model.eval()
+                self.g_model.train()
+                self.g_optimizer.zero_grad()
+                g_loss = self.loss_fn(self.d_model(fake_imgs), target_ones)
+                g_loss.backward()
+                self.g_optimizer.step()
 
                 pbar.update(1)
 
