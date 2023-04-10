@@ -26,7 +26,7 @@ class MyLoader:
                                  drop_last=True)
         print('real data has been loaded over!!')
 
-        noise_data = NoiseDataset(0, 1, 60000)
+        noise_data = NoiseDataset(0, 1, 70000)
         noise_loader = DataLoader(noise_data,
                                   batch_size=self.batch_size,
                                   drop_last=True)

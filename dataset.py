@@ -18,7 +18,7 @@ class MnistDataset(Dataset):
     def __init__(self, data_root, transform=None):
         # 改这里记得把train里面noise生成的数目改了
         self.train_img_dir = os.path.join(data_root, 'train-images.idx3-ubyte')
-        # self.test_img_dir = os.path.join(data_root, 't10k-images.idx3-ubyte')
+        self.test_img_dir = os.path.join(data_root, 't10k-images.idx3-ubyte')
         self.images = np.concatenate(self.run_pool(), axis=0)
         self.transform = transform
 
@@ -36,8 +36,8 @@ class MnistDataset(Dataset):
 
     def run_pool(self):
         cpu_worker_num = 4
-        # process_args = [self.train_img_dir, self.test_img_dir]
-        process_args = [self.train_img_dir]
+        process_args = [self.train_img_dir, self.test_img_dir]
+        # process_args = [self.train_img_dir]
         with Pool(cpu_worker_num) as p:
             outputs = p.map(read_image, process_args)
         return outputs
