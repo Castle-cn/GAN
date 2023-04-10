@@ -33,15 +33,16 @@ class Model:
     def __init__(self, loader: MyLoader, device):
         self.loader = loader
         self.device = device
-        self.lr = 1e-4
+        self.d_lr = 1e-4
+        self.g_lr = 1e-3
         self.noise_dims = 10
         self.loss_fn = nn.BCELoss()
 
         self.g_model = Generator(self.noise_dims).to(device)
-        self.g_optimizer = torch.optim.Adam(self.g_model.parameters(), lr=self.lr)
+        self.g_optimizer = torch.optim.Adam(self.g_model.parameters(), lr=self.g_lr)
 
         self.d_model = Discriminator().to(device)
-        self.d_optimizer = torch.optim.Adam(self.d_model.parameters(), lr=self.lr)
+        self.d_optimizer = torch.optim.Adam(self.d_model.parameters(), lr=self.d_lr)
 
     def train(self):
         num_batches = len(self.loader.real_loader)
