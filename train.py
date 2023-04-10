@@ -17,8 +17,9 @@ class MyLoader:
         self.real_loader, self.noise_loader = self.get_dataloader()
 
     def get_dataloader(self):
-        transform = transforms.Compose([transforms.ToTensor(),
-                                        transforms.Normalize([0.1307], [0.3081])])
+        transform = transforms.ToTensor()
+        # transform = transforms.Compose([transforms.ToTensor(),
+        #                                 transforms.Normalize([0.1307], [0.3081])])
         real_data = MnistDataset(data_root=self.real_data_root, transform=transform)
         real_loader = DataLoader(real_data,
                                  batch_size=self.batch_size,
@@ -79,9 +80,9 @@ class Model:
 
                 gen = self.g_model(noise)
                 # normalize the fake images
-                mean = torch.mean(gen)
-                std = torch.std(gen)
-                gen = (gen - mean) / std
+                # mean = torch.mean(gen)
+                # std = torch.std(gen)
+                # gen = (gen - mean) / std
 
                 gen_img_score = self.d_model(gen)
                 real_img_score = self.d_model(real)
@@ -107,9 +108,9 @@ class Model:
                 # Compute prediction error
                 gen = self.g_model(noise)
                 # normalize the fake images
-                mean = torch.mean(gen)
-                std = torch.std(gen)
-                gen = (gen - mean) / std
+                # mean = torch.mean(gen)
+                # std = torch.std(gen)
+                # gen = (gen - mean) / std
 
                 gen_img_score = self.d_model(gen)
                 loss = self.g_loss_fn(gen_img_score)
