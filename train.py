@@ -6,7 +6,6 @@ from tqdm import tqdm
 import os
 from torch.utils.data import DataLoader
 import argparse
-import sys
 from dataset import MnistDataset, NoiseDataset
 
 
@@ -25,7 +24,7 @@ class MyLoader:
                                  drop_last=True)
         print('real data has been loaded over!!')
 
-        noise_data = NoiseDataset(0, 1, 10000)
+        noise_data = NoiseDataset(0, 1, 70000)
         noise_loader = DataLoader(noise_data,
                                   batch_size=self.batch_size,
                                   drop_last=True)
@@ -95,8 +94,6 @@ class Model:
 
 def run(model: Model,
         t_epochs,
-        d_epochs,
-        g_epochs,
         save_model_path):
     if not os.path.exists(save_model_path):
         os.mkdir(save_model_path)
@@ -115,7 +112,7 @@ def run(model: Model,
                        os.path.join(save_model_path, f'dis_model_weights_{t + 1}.pth'))
 
 
-def main(data_root, t_epochs, d_epochs, g_epochs):
+def main(data_root, t_epochs):
     batch_size = 32
 
     device = 'cpu'
@@ -127,7 +124,7 @@ def main(data_root, t_epochs, d_epochs, g_epochs):
 
     save_model_path = 'model'
 
-    run(model, t_epochs, d_epochs, g_epochs, save_model_path)
+    run(model, t_epochs, save_model_path)
 
 
 if __name__ == '__main__':
@@ -139,16 +136,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--t_epochs',
                         type=int,
-                        default=30)
-
-    parser.add_argument('--d_epochs',
-                        type=int,
-                        default=3)
-
-    parser.add_argument('--g_epochs',
-                        type=int,
-                        default=2)
+                        default=100)
 
     args = parser.parse_args()
 
-    main(args.data_root, args.t_epochs, args.d_epochs, args.g_epochs)
+    main(args.data_root, args.t_epochs)
