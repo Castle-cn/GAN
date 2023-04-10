@@ -82,8 +82,9 @@ class Model:
                 gen = self.g_model(noise)
                 gen_img_score = self.d_model(gen)
                 loss = self.g_loss_fn(gen_img_score)
+                print(gen_img_score)
                 print(loss)
-
+                sys.exit()
                 # Backpropagation
                 self.g_optimizer.zero_grad()
                 loss.backward()
