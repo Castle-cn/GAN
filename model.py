@@ -180,8 +180,8 @@ class Generator(nn.Module):
 class Discriminator(nn.Module):
     def __init__(self):
         super().__init__()
-        # self.discriminator = LeNet(1, 1)
-        self.discriminator = SimpleNet(28 * 28, 1)
+        self.discriminator = LeNet(1, 1)
+        # self.discriminator = SimpleNet(28 * 28, 1)
 
     def forward(self, x):
         x = self.discriminator(x)
