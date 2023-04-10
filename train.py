@@ -66,10 +66,10 @@ class Model:
                 loss.backward()
                 self.d_optimizer.step()
                 pbar.update(1)
-                pbar.set_postfix(loss=f'{loss.item():>5f}')
+                pbar.set_postfix(loss=f'{loss.item() / self.loader.batch_size:>5f}')
 
             loss = loss.item()
-            tqdm.write(f"discriminator loss: {loss:>7f}")
+            tqdm.write(f"discriminator loss: {loss.item() / self.loader.batch_size:>7f}")
 
     def train_generator(self):
         num_batches = len(self.loader.noise_loader)
@@ -87,10 +87,10 @@ class Model:
                 loss.backward()
                 self.g_optimizer.step()
                 pbar.update(1)
-                pbar.set_postfix(loss=f'{loss.item():>5f}')
+                pbar.set_postfix(loss=f'{loss.item() / self.loader.batch_size:>5f}')
 
             loss = loss.item()
-            tqdm.write(f"generator loss: {loss:>7f}")
+            tqdm.write(f"generator loss: {loss.item() / self.loader.batch_size:>7f}")
 
 
 def run(model: Model,
@@ -101,9 +101,11 @@ def run(model: Model,
     for t in range(t_epochs):
         print(f"----------Training the {t + 1} time---------")
         print("training discriminator")
-        model.train_discriminator()
+        for d in range(5):
+            model.train_discriminator()
         print("\ntraining generator")
-        model.train_generator()
+        for g in range(3):
+            model.train_generator()
         print('\n\n')
 
         if t % 20 == 0:
