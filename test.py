@@ -45,7 +45,7 @@ if __name__ == '__main__':
                     [2.1299e-05],
                     [6.5475e-05]])
     a = np.squeeze(np.reshape(a, [1, -1]))
-    b = np.ones_like(a)
+    b = np.zeros_like(a)
     print(cross_entropy(a, b))
 
     a = torch.from_numpy(a)
