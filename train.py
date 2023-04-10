@@ -126,4 +126,4 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    main(args.data_root, args.t_epochs)
+    main(args.data_root, args.epochs)
