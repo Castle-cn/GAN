@@ -19,7 +19,7 @@ class MyLoader:
     def get_dataloader(self):
         # transform = transforms.Compose([transforms.ToTensor()])
         transform = transforms.Compose([transforms.ToTensor(),
-                                        transforms.Normalize([0.1307], [0.3081])])
+                                        transforms.Normalize([0.5], [0.5])])
         real_data = MnistDataset(data_root=self.real_data_root, transform=transform)
         real_loader = DataLoader(real_data,
                                  batch_size=self.batch_size,
