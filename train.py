@@ -38,7 +38,7 @@ class Model:
     def __init__(self, loader: MyLoader, device):
         self.loader = loader
         self.device = device
-        self.lr = 1e-3
+        self.lr = 2e-3
 
         self.g_model = Generator(100, 28 * 28).to(device)
         self.g_loss_fn = GeneratorLoss()
