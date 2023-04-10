@@ -39,11 +39,7 @@ class Discriminator(nn.Module):
             nn.ReLU(inplace=True),
             nn.Linear(1024, 512),
             nn.ReLU(inplace=True),
-            nn.Linear(512, 256),
-            nn.ReLU(inplace=True),
-            nn.Linear(256, 128),
-            nn.ReLU(inplace=True),
-            nn.Linear(128, 1),
+            nn.Linear(512, 1),
             nn.Sigmoid()
         )
 
