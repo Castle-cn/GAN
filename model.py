@@ -37,9 +37,7 @@ class Discriminator(nn.Module):
         self.stack = nn.Sequential(
             nn.Linear(np.prod(img_size).item(), 256),
             nn.ReLU(inplace=True),
-            nn.Linear(256, 128),
-            nn.ReLU(inplace=True),
-            nn.Linear(128, 1),
+            nn.Linear(256, 1),
             nn.Sigmoid()
         )
 
