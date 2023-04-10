@@ -36,18 +36,18 @@ class MyLoader:
 
 
 class Model:
-    def __init__(self, loader: MyLoader, d_model, d_loss_fn, d_optimizer,
-                 g_model, g_loss_fn, g_optimizer, device):
+    def __init__(self, loader: MyLoader, batch_size, device):
         self.loader = loader
         self.device = device
+        self.lr = 1e-3
 
-        self.d_model = d_model.to(device)
-        self.d_loss_fn = d_loss_fn
-        self.d_optimizer = d_optimizer
+        self.g_model = Generator([28, 28], batch_size).to(device)
+        self.g_loss_fn = GeneratorLoss()
+        self.g_optimizer = torch.optim.Adam(self.g_model.parameters(), lr=self.lr)
 
-        self.g_model = g_model.to(device)
-        self.g_loss_fn = g_loss_fn
-        self.g_optimizer = g_optimizer
+        self.d_model = Discriminator().to(device)
+        self.d_loss_fn = DiscriminatorLoss()
+        self.d_optimizer = torch.optim.Adam(self.d_model.parameters(), lr=self.lr)
 
     def train_discriminator(self):
         num_batches = len(self.loader.real_loader)
@@ -122,23 +122,13 @@ def run(model: Model,
 
 def main(data_root, t_epochs, d_epochs, g_epochs):
     batch_size = 32
-    lr = 1e-3
 
     device = 'cpu'
     if torch.cuda.is_available():
         device = 'cuda'
 
-    gen_model = Generator([28, 28], batch_size)
-    gen_loss_fn = GeneratorLoss()
-    gen_optimizer = torch.optim.Adam(gen_model.parameters(), lr=lr)
-
-    dis_model = Discriminator()
-    dis_loss_fn = DiscriminatorLoss()
-    dis_optimizer = torch.optim.Adam(dis_model.parameters(), lr=lr)
-
     loader = MyLoader(data_root, batch_size, [28, 28])
-    model = Model(loader, dis_model, dis_loss_fn, dis_optimizer,
-                  gen_model, gen_loss_fn, gen_optimizer, device)
+    model = Model(loader, batch_size, device)
 
     save_model_path = 'model'
 
@@ -158,11 +148,11 @@ if __name__ == '__main__':
 
     parser.add_argument('--d_epochs',
                         type=int,
-                        default=5)
+                        default=3)
 
     parser.add_argument('--g_epochs',
                         type=int,
-                        default=3)
+                        default=2)
 
     args = parser.parse_args()
 
