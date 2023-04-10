@@ -130,6 +130,7 @@ class LeNet(nn.Module):
         self.fc3 = nn.Sequential(
             nn.Linear(in_features=84, out_features=class_nums)
         )
+        self.sigmod = nn.Sigmoid()
 
     def forward(self, input):
         conv1_output = self.conv1(input)  # [28,28,1]-->[24,24,6]-->[12,12,6]
@@ -138,7 +139,26 @@ class LeNet(nn.Module):
         fc1_output = self.fc1(conv2_output)  # [n,256]-->[n,120]
         fc2_output = self.fc2(fc1_output)  # [n,120]-->[n,84]
         fc3_output = self.fc3(fc2_output)  # [n,84]-->[n,10]
-        return fc3_output
+        out = self.sigmod(fc3_output)
+        return out
+
+
+class SimpleNet(nn.Module):
+    def __init__(self, in_feature, num_class):
+        super().__init__()
+        self.stack = nn.Sequential(
+            nn.Linear(in_feature, 1024),
+            nn.BatchNorm1d(1024),
+            nn.Linear(1024, 1024),
+            nn.BatchNorm1d(1024),
+            nn.Linear(1024, num_class),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        B, C, H, W = x.shape
+        x = torch.reshape(x, [B, C * H * W])
+        return self.stack(x)
 
 
 class Generator(nn.Module):
@@ -154,17 +174,17 @@ class Generator(nn.Module):
     def forward(self, x):
         x = self.generator(x)  # 输出的就是图片打平后
         x = torch.round(F.normalize(x, dim=1) * 255)
-        return x.reshape((self.batch_size, 1, self.H, self.W)) # [batch,1,H,W]
+        return x.reshape((self.batch_size, 1, self.H, self.W))  # [batch,1,H,W]
+
 
 class Discriminator(nn.Module):
     def __init__(self):
         super().__init__()
-        self.sigmoid = nn.Sigmoid()
-        self.discriminator = LeNet(1, 1)
+        # self.discriminator = LeNet(1, 1)
+        self.discriminator = SimpleNet(28 * 28, 1)
 
     def forward(self, x):
         x = self.discriminator(x)
-        x = self.sigmoid(x)
         return x  # x is a scalar
 
 # gen_model = Generator((28, 28))
