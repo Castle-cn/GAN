@@ -81,9 +81,8 @@ class Model:
                 # Compute prediction error
                 gen = self.g_model(noise)
                 gen_img_score = self.d_model(gen)
-                print(gen_img_score)
-                sys.exit()
                 loss = self.g_loss_fn(gen_img_score)
+                print(loss)
 
                 # Backpropagation
                 self.g_optimizer.zero_grad()
