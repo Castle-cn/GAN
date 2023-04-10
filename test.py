@@ -15,5 +15,5 @@ if __name__ == '__main__':
     out = np.squeeze(g(data).detach().numpy())
     print(out.shape)
     # out = (out + 1) / 2
-    plt.imshow(out[2], cmap='gray')
+    plt.imshow(out[1], cmap='gray')
     plt.show()
