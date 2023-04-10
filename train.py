@@ -89,7 +89,7 @@ class Model:
 
                 # Backpropagation
                 self.d_optimizer.zero_grad()
-                loss.backward(retain_graph=True)
+                loss.backward()
                 self.d_optimizer.step()
                 pbar.update(1)
                 pbar.set_postfix(loss=f'{loss.item():>5f}')
@@ -106,6 +106,11 @@ class Model:
 
                 # Compute prediction error
                 gen = self.g_model(noise)
+                # normalize the fake images
+                mean = torch.mean(gen)
+                std = torch.std(gen)
+                gen = (gen - mean) / std
+
                 gen_img_score = self.d_model(gen)
                 loss = self.g_loss_fn(gen_img_score)
 
