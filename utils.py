@@ -25,4 +25,3 @@ class GeneratorLoss(nn.Module):
         gen_img_score = torch.flatten(gen_img_score)
         gen_loss = F.binary_cross_entropy_with_logits(gen_img_score, torch.ones_like(gen_img_score))
         return gen_loss
-
