@@ -17,16 +17,16 @@ class MyLoader:
         self.real_loader, self.noise_loader = self.get_dataloader()
 
     def get_dataloader(self):
-        transform = transforms.Compose([transforms.ToTensor()])
-        # transform = transforms.Compose([transforms.ToTensor(),
-        #                                 transforms.Normalize([0.1307], [0.3081])])
+        # transform = transforms.Compose([transforms.ToTensor()])
+        transform = transforms.Compose([transforms.ToTensor(),
+                                        transforms.Normalize([0.1307], [0.3081])])
         real_data = MnistDataset(data_root=self.real_data_root, transform=transform)
         real_loader = DataLoader(real_data,
                                  batch_size=self.batch_size,
                                  drop_last=True)
         print('real data has been loaded over!!')
 
-        noise_data = NoiseDataset(0, 1, 10000)
+        noise_data = NoiseDataset(0, 1, 70000)
         noise_loader = DataLoader(noise_data,
                                   batch_size=self.batch_size,
                                   drop_last=True)
