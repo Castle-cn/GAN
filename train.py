@@ -39,7 +39,7 @@ class Model:
     def __init__(self, loader: MyLoader, device):
         self.loader = loader
         self.device = device
-        self.lr = 2e-3
+        self.lr = 1e-3
 
         self.g_model = Generator(100).to(device)
         self.g_loss_fn = GeneratorLoss()
@@ -61,7 +61,6 @@ class Model:
                 gen_img_score = self.d_model(gen)
                 real_img_score = self.d_model(real)
                 loss = self.d_loss_fn(real_img_score, gen_img_score)
-
                 # Backpropagation
                 self.d_optimizer.zero_grad()
                 loss.backward()
@@ -102,11 +101,9 @@ def run(model: Model,
     for t in range(t_epochs):
         print(f"----------Training the {t + 1} time---------")
         print("training discriminator")
-        for d in range(5):
-            model.train_discriminator()
+        model.train_discriminator()
         print("\ntraining generator")
-        for g in range(3):
-            model.train_generator()
+        model.train_generator()
         print('\n\n')
 
         if t % 20 == 0:
@@ -117,7 +114,7 @@ def run(model: Model,
 
 
 def main(data_root, t_epochs):
-    batch_size = 32
+    batch_size = 64
 
     device = 'cpu'
     if torch.cuda.is_available():
