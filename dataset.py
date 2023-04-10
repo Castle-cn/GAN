@@ -9,7 +9,7 @@ import numpy as np
 class MnistDataset(Dataset):
     # 类的初始化,没什么好说的,固定格式,微调即可
     def __init__(self, data_root, transform=None):
-        self.train_img_dir = os.path.join(data_root, 'train-images.idx3-ubyte')
+        # self.train_img_dir = os.path.join(data_root, 'train-images.idx3-ubyte')
         self.test_img_dir = os.path.join(data_root, 't10k-images.idx3-ubyte')
         self.images = np.concatenate(self.run_pool(), axis=0)
         self.transform = transform
@@ -34,7 +34,8 @@ class MnistDataset(Dataset):
 
     def run_pool(self):
         cpu_worker_num = 4
-        process_args = [self.train_img_dir, self.test_img_dir]
+        # process_args = [self.train_img_dir, self.test_img_dir]
+        process_args = [self.test_img_dir]
         with Pool(cpu_worker_num) as p:
             outputs = p.map(self.read_image, process_args)
         return outputs
@@ -74,7 +75,7 @@ class NoiseDataset(Dataset):
 
 class GenImage(Dataset):
     # img_size 是生成的图片的大小
-    def __init__(self, gen_images, img_size:list):
+    def __init__(self, gen_images, img_size: list):
         mean = torch.mean(gen_images)
         std = torch.std(gen_images)
         gen_images = (gen_images - mean) / std
