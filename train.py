@@ -69,7 +69,7 @@ class Model:
                 pbar.set_postfix(loss=f'{loss.item() / self.loader.batch_size:>5f}')
 
             loss = loss.item()
-            tqdm.write(f"discriminator loss: {loss.item() / self.loader.batch_size:>7f}")
+            tqdm.write(f"discriminator loss: {loss / self.loader.batch_size:>7f}")
 
     def train_generator(self):
         num_batches = len(self.loader.noise_loader)
@@ -90,7 +90,7 @@ class Model:
                 pbar.set_postfix(loss=f'{loss.item() / self.loader.batch_size:>5f}')
 
             loss = loss.item()
-            tqdm.write(f"generator loss: {loss.item() / self.loader.batch_size:>7f}")
+            tqdm.write(f"generator loss: {loss / self.loader.batch_size:>7f}")
 
 
 def run(model: Model,
