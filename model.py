@@ -22,7 +22,7 @@ class Generator(nn.Module):
     # 输入x是随机噪声
     def forward(self, x):
         x = self.generator(x)  # 输出的就是图片打平后
-        return x.reshape((-1, 1, self.H, self.W))  # [batch,1,H,W]
+        return x.reshape((-1, 1, 28, 28))  # [batch,1,H,W]
 
 
 class Discriminator(nn.Module):
