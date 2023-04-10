@@ -1,6 +1,6 @@
 import time
 from functools import reduce
-
+import torch.nn.functional as F
 import numpy as np
 from typing import Union
 from multiprocessing import Pool
@@ -30,11 +30,10 @@ from torch import nn
 
 # 主线程不建议写在 if外部。
 if __name__ == '__main__':
-    m = nn.BatchNorm1d(4)
-    input = torch.asarray([[0.,1.,2.,3.],
-                           [1.,1.,2.,3.]])
-    output = m(input)
-    print(output)
+    real_img_score = torch.flatten(torch.asarray([[0.1],[0.3]]))
+    b = torch.ones_like(real_img_score)
+    real_loss = F.cross_entropy(torch.ones_like(real_img_score), real_img_score)
+    print(real_loss)
 
 # t1 = time.time()
 # # # a = torch.normal(0, 1, size=(70000, 224, 224))
