@@ -13,13 +13,13 @@ if __name__ == '__main__':
         device = 'cuda'
 
     discriminator = Discriminator().to(device)
-    discriminator.load_state_dict(torch.load('E:\desktop\dis_model_weights_4.pth'))
+    discriminator.load_state_dict(torch.load('E:\desktop\dis_model_weights_30.pth'))
     discriminator.eval()
 
-    generator = Generator([28, 28]).to(device)
-    generator.load_state_dict(torch.load('E:\desktop\gen_model_weights_4.pth'))
+    generator = Generator().to(device)
+    generator.load_state_dict(torch.load('E:\desktop\gen_model_weights_30.pth'))
     generator.eval()
-    noise = torch.normal(mean=0, std=1, size=[10, 1, 64, 64]).to(device)
+    noise = torch.normal(mean=0, std=1, size=[10, 100]).to(device)
 
     gen = generator(noise)
     score = discriminator(gen)

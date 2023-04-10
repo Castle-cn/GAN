@@ -11,10 +11,9 @@ from dataset import MnistDataset, NoiseDataset
 
 
 class MyLoader:
-    def __init__(self, real_data_root, batch_size, fake_img_size: list):
+    def __init__(self, real_data_root, batch_size):
         self.real_data_root = real_data_root
         self.batch_size = batch_size
-        self.fake_img_size = fake_img_size
         self.real_loader, self.noise_loader = self.get_dataloader()
 
     def get_dataloader(self):
@@ -41,11 +40,11 @@ class Model:
         self.device = device
         self.lr = 1e-3
 
-        self.g_model = Generator().to(device)
+        self.g_model = Generator(100, 28 * 28).to(device)
         self.g_loss_fn = GeneratorLoss()
         self.g_optimizer = torch.optim.Adam(self.g_model.parameters(), lr=self.lr)
 
-        self.d_model = Discriminator().to(device)
+        self.d_model = Discriminator(28 * 28).to(device)
         self.d_loss_fn = DiscriminatorLoss()
         self.d_optimizer = torch.optim.Adam(self.d_model.parameters(), lr=self.lr)
 
@@ -104,20 +103,16 @@ def run(model: Model,
     for t in range(t_epochs):
         print(f"----------Training the {t + 1} time---------")
         print("training discriminator")
-        # gen_loader = model.loader.get_gen_dataloader(model.g_model, model.device)
-        for d in range(d_epochs):
-            print(f"----------Epoch {d + 1} ---------")
-            model.train_discriminator()
+        model.train_discriminator()
         print("\ntraining generator")
-        for g in range(g_epochs):
-            print(f"----------Epoch {g + 1} ---------")
-            model.train_generator()
+        model.train_generator()
         print('\n\n')
 
-        torch.save(model.g_model.state_dict(),
-                   os.path.join(save_model_path, f'gen_model_weights_{t + 1}.pth'))
-        torch.save(model.d_model.state_dict(),
-                   os.path.join(save_model_path, f'dis_model_weights_{t + 1}.pth'))
+        if t % 20 == 0:
+            torch.save(model.g_model.state_dict(),
+                       os.path.join(save_model_path, f'gen_model_weights_{t + 1}.pth'))
+            torch.save(model.d_model.state_dict(),
+                       os.path.join(save_model_path, f'dis_model_weights_{t + 1}.pth'))
 
 
 def main(data_root, t_epochs, d_epochs, g_epochs):
@@ -127,7 +122,7 @@ def main(data_root, t_epochs, d_epochs, g_epochs):
     if torch.cuda.is_available():
         device = 'cuda'
 
-    loader = MyLoader(data_root, batch_size, [28, 28])
+    loader = MyLoader(data_root, batch_size)
     model = Model(loader, device)
 
     save_model_path = 'model'

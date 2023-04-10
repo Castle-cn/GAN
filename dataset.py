@@ -6,6 +6,13 @@ from torch.utils.data import Dataset
 import numpy as np
 
 
+def read_image(image_path):
+    with open(image_path, 'rb') as imgpath:
+        _, num, rows, cols = struct.unpack('>IIII', imgpath.read(16))
+        images = np.fromfile(imgpath, dtype=np.uint8).reshape(num, rows * cols)
+    return images
+
+
 class MnistDataset(Dataset):
     # 类的初始化,没什么好说的,固定格式,微调即可
     def __init__(self, data_root, transform=None):
@@ -20,24 +27,18 @@ class MnistDataset(Dataset):
 
     # 获取指定index的数据
     def __getitem__(self, idx):
-        image = self.images[idx].reshape([28, 28])
+        image = self.images[idx]
         # transform固定写法, 基本不变
         if self.transform:
             image = self.transform(image)
         return image
-
-    def read_image(self, image_path):
-        with open(image_path, 'rb') as imgpath:
-            _, num, rows, cols = struct.unpack('>IIII', imgpath.read(16))
-            images = np.fromfile(imgpath, dtype=np.uint8).reshape(num, rows * cols)
-        return images
 
     def run_pool(self):
         cpu_worker_num = 4
         # process_args = [self.train_img_dir, self.test_img_dir]
         process_args = [self.test_img_dir]
         with Pool(cpu_worker_num) as p:
-            outputs = p.map(self.read_image, process_args)
+            outputs = p.map(read_image, process_args)
         return outputs
 
 
@@ -69,18 +70,3 @@ class NoiseDataset(Dataset):
         with Pool(cpu_worker_num) as p:
             outputs = p.map(self.gen_noise, process_args)
         return outputs
-
-# class GenImage(Dataset):
-#     # img_size 是生成的图片的大小
-#     def __init__(self, gen_images, img_size: list):
-#         mean = torch.mean(gen_images)
-#         std = torch.std(gen_images)
-#         gen_images = (gen_images - mean) / std
-#         self.images = gen_images.reshape((len(gen_images), 1, img_size[0], img_size[1]))
-#
-#     def __len__(self):
-#         return len(self.images)
-#
-#     def __getitem__(self, index):
-#         image = self.images[index]
-#         return image
