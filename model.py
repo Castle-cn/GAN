@@ -26,7 +26,7 @@ class Generator(nn.Module):
 
     def forward(self, x):
         x = self.stack(x)
-        x.reshape([img_size[0], -1])
+        x = x.reshape([x.shape[0], *img_size])
         return x
 
 
@@ -35,9 +35,7 @@ class Discriminator(nn.Module):
     def __init__(self):
         super(Discriminator, self).__init__()
         self.stack = nn.Sequential(
-            nn.Linear(np.prod(img_size).item(), 1024),
-            nn.ReLU(inplace=True),
-            nn.Linear(1024, 512),
+            nn.Linear(np.prod(img_size).item(), 512),
             nn.ReLU(inplace=True),
             nn.Linear(512, 256),
             nn.ReLU(inplace=True),
@@ -49,6 +47,6 @@ class Discriminator(nn.Module):
 
     def forward(self, x):
         # 输入是一张图片
-        x = x.reshape((x.shape[0], -1))
-        out = self.stack(x)
-        return out
+        x = x.reshape([x.shape[0], -1])
+        x = self.stack(x)
+        return x
