@@ -42,13 +42,11 @@ class MnistDataset(Dataset):
 
 
 class NoiseDataset(Dataset):
-    def __init__(self, mean, std, nums, img_size: list):
+    def __init__(self, mean, std, nums):
         self.mean = mean
         self.std = std
-        self.img_size = img_size
         self.nums = nums
         self.images = torch.cat(self.run_pool(), dim=0)
-        self.images = self.images[:, None, ...]
 
     def __len__(self):
         return len(self.images)
@@ -64,14 +62,13 @@ class NoiseDataset(Dataset):
     def run_pool(self):
         cpu_worker_num = 4
         n = self.nums // 10000
-        process_args = [{'num': 10000, 'size': self.img_size}] * n
+        process_args = [{'num': 10000, 'size': [100]}] * n
         if self.nums % 10000 != 0:
-            process_args.append({'num': self.nums % 10000, 'size': self.img_size})
+            process_args.append({'num': self.nums % 10000, 'size': [100]})
 
         with Pool(cpu_worker_num) as p:
             outputs = p.map(self.gen_noise, process_args)
         return outputs
-
 
 # class GenImage(Dataset):
 #     # img_size 是生成的图片的大小

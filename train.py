@@ -26,7 +26,7 @@ class MyLoader:
                                  drop_last=True)
         print('real data has been loaded over!!')
 
-        noise_data = NoiseDataset(0, 1, 10000, [64, 64])
+        noise_data = NoiseDataset(0, 1, 10000)
         noise_loader = DataLoader(noise_data,
                                   batch_size=self.batch_size,
                                   drop_last=True)
@@ -41,7 +41,7 @@ class Model:
         self.device = device
         self.lr = 1e-3
 
-        self.g_model = Generator([28, 28]).to(device)
+        self.g_model = Generator().to(device)
         self.g_loss_fn = GeneratorLoss()
         self.g_optimizer = torch.optim.Adam(self.g_model.parameters(), lr=self.lr)
 
@@ -75,7 +75,7 @@ class Model:
         num_batches = len(self.loader.noise_loader)
         self.g_model.train()
         with tqdm(total=num_batches) as pbar:
-            for batch, noise in enumerate(self.loader.noise_loader):
+            for _, noise in enumerate(self.loader.noise_loader):
                 noise = noise.to(self.device)
 
                 # Compute prediction error
