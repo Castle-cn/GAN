@@ -33,10 +33,12 @@ class Generator(nn.Module):
 class Discriminator(nn.Module):
     def __init__(self, d_input_dim):
         super(Discriminator, self).__init__()
-        self.flat = nn.Flatten()
+
         self.relu = nn.LeakyReLU()
         self.sigmod = nn.Sigmoid()
 
+        self.flat = nn.Flatten()
+        self.bn0 = nn.BatchNorm1d(d_input_dim)
         self.linear1 = nn.Linear(d_input_dim, 1024)
         self.bn1 = nn.BatchNorm1d(1024)
         self.linear2 = nn.Linear(1024, 512)
@@ -87,6 +89,8 @@ class Discriminator(nn.Module):
 
 
 # gen_model = Generator((28, 28))
-model = Discriminator(28 * 28)
-data = torch.randn((31, 28 * 28))
-out = model(data)
+# model = Discriminator(28 * 28)
+# for i in range(2):
+#     data = torch.randn((32, 28 * 28))
+# out = model(data)
+# print(out)

@@ -51,6 +51,7 @@ class Model:
     def train_discriminator(self):
         num_batches = len(self.loader.real_loader)
         self.d_model.train()
+        self.g_model.eval()
         with tqdm(total=num_batches) as pbar:
             for _, (real, noise) in enumerate(zip(self.loader.real_loader, self.loader.noise_loader)):
                 real, noise = real.to(self.device), noise.to(self.device)
