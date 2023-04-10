@@ -49,13 +49,15 @@ class Model:
             for _, real_imgs in enumerate(self.loader.real_loader):
                 real_imgs = real_imgs.to(self.device)
                 noise = torch.randn(size=(self.loader.batch_size, self.noise_dims)).to(self.device)
+                target_ones = torch.ones(self.loader.batch_size, 1).to(self.device)
+                target_zeros = torch.zeros(self.loader.batch_size, 1).to(self.device)
 
                 # 训练generator
                 self.d_model.eval()
                 self.g_model.train()
                 fake_imgs = self.g_model(noise)
                 self.g_optimizer.zero_grad()
-                g_loss = self.loss_fn(self.d_model(fake_imgs), torch.ones(self.loader.batch_size, 1))
+                g_loss = self.loss_fn(self.d_model(fake_imgs), target_ones)
                 g_loss.backward()
                 self.g_optimizer.step()
 
@@ -63,8 +65,8 @@ class Model:
                 self.d_model.train()
                 self.g_model.eval()
                 self.d_optimizer.zero_grad()
-                d_loss = 0.5 * (self.loss_fn(self.d_model(real_imgs), torch.ones(self.loader.batch_size, 1))) + \
-                         0.5 * (self.loss_fn(self.d_model(fake_imgs.detach()), torch.zeros(self.loader.batch_size, 1)))
+                d_loss = 0.5 * (self.loss_fn(self.d_model(real_imgs), target_ones)) + \
+                         0.5 * (self.loss_fn(self.d_model(fake_imgs.detach()), target_zeros))
                 d_loss.backward()
                 self.d_optimizer.step()
 
