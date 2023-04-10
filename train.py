@@ -90,7 +90,7 @@ class Model():
 
                 # Backpropagation
                 self.d_optimizer.zero_grad()
-                loss.backward()
+                loss.backward(retain_graph=True)
                 self.d_optimizer.step()
                 pbar.update(1)
                 pbar.set_postfix(loss=f'{loss.item():>5f}')
