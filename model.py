@@ -17,7 +17,7 @@ class Generator(nn.Module):
         x = F.leaky_relu(self.fc1(x), 0.2)
         x = F.leaky_relu(self.fc2(x), 0.2)
         x = F.leaky_relu(self.fc3(x), 0.2)
-        x = F.tanh(self.fc4(x))
+        x = torch.tanh(self.fc4(x))
         x = self.norm(x)
         return x
 
@@ -40,7 +40,7 @@ class Discriminator(nn.Module):
         x = F.dropout(x, 0.3)
         x = F.leaky_relu(self.fc3(x), 0.2)
         x = F.dropout(x, 0.3)
-        x = F.sigmoid(self.fc4(x))
+        x = torch.sigmoid(self.fc4(x))
         return x
 
 # gen_model = Generator((28, 28))
