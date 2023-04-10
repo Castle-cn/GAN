@@ -110,8 +110,39 @@ class ResNet(nn.Module):
         return x
 
 
+class LeNet(nn.Module):
+    def __init__(self, in_channels, class_nums):
+        super(LeNet, self).__init__()
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(in_channels=in_channels, out_channels=6, kernel_size=5, stride=1),
+            nn.MaxPool2d(kernel_size=2)
+        )
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(in_channels=6, out_channels=16, kernel_size=5, stride=1),
+            nn.MaxPool2d(kernel_size=2)
+        )
+        self.fc1 = nn.Sequential(
+            nn.Linear(in_features=4 * 4 * 16, out_features=120)
+        )
+        self.fc2 = nn.Sequential(
+            nn.Linear(in_features=120, out_features=84)
+        )
+        self.fc3 = nn.Sequential(
+            nn.Linear(in_features=84, out_features=class_nums)
+        )
+
+    def forward(self, input):
+        conv1_output = self.conv1(input)  # [28,28,1]-->[24,24,6]-->[12,12,6]
+        conv2_output = self.conv2(conv1_output)  # [12,12,6]-->[8,8,16]-->[4,4,16]
+        conv2_output = conv2_output.view(-1, 4 * 4 * 16)  # [n,4,4,16]-->[n,4*4*16],其中n代表个数
+        fc1_output = self.fc1(conv2_output)  # [n,256]-->[n,120]
+        fc2_output = self.fc2(fc1_output)  # [n,120]-->[n,84]
+        fc3_output = self.fc3(fc2_output)  # [n,84]-->[n,10]
+        return fc3_output
+
+
 class Generator(nn.Module):
-    def __init__(self, img_size: tuple, batch_size):
+    def __init__(self, img_size: list, batch_size):
         super().__init__()
         if len(img_size) > 2:
             raise ValueError("img_size should be (H,W) of the train image")
@@ -122,15 +153,15 @@ class Generator(nn.Module):
     # 输入x是随机噪声，大小为224*224
     def forward(self, x):
         x = self.generator(x)  # 输出的就是图片打平后
-        x = (torch.round(F.normalize(x, dim=1) * 255) - 0.1307) / 0.3081
-        return x.reshape((self.batch_size, 1, self.H, self.W))
-
+        x = torch.round(F.normalize(x, dim=1) * 255)
+        # return x.reshape((self.batch_size, 1, self.H, self.W))
+        return x
 
 class Discriminator(nn.Module):
     def __init__(self):
         super().__init__()
         self.sigmoid = nn.Sigmoid()
-        self.discriminator = ResNet(BuildingBlock, [2, 2, 2, 2], 1, 1)
+        self.discriminator = LeNet(1, 1)
 
     def forward(self, x):
         x = self.discriminator(x)

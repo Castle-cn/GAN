@@ -6,125 +6,147 @@ from tqdm import tqdm
 import os
 from torch.utils.data import DataLoader
 import argparse
-from dataset import MnistDataset, NoiseDataset
+from dataset import MnistDataset, NoiseDataset, GenImage
 import sys
 
 
-# real_dataloader的batch_size和num_batch要和noise_dataloader一致
-def train_discriminator(real_dataloader,
-                        noise_dataloader,
-                        d_model,
-                        g_model,
-                        loss_fn,
-                        optimizer,
-                        device):
-    num_batches = len(real_dataloader)
-    d_model.train()
-    with tqdm(total=num_batches) as pbar:
-        for batch, (real, noise) in enumerate(zip(real_dataloader, noise_dataloader)):
-            real, noise = real.to(device), noise.to(device)
+class MyLoader():
+    def __init__(self, real_data_root, batch_size, fake_img_size: list):
+        self.real_data_root = real_data_root
+        self.batch_size = batch_size
+        self.fake_img_size = fake_img_size
+        self.real_loader, self.noise_loader = self.get_dataloader()
 
-            # Compute prediction error
-            gen = g_model(noise)
-            gen_img_score = d_model(gen)
-            # print(gen_img_score)
-            real_img_score = d_model(real)
-            # print(real_img_score)
-            # sys.exit()
-            loss = loss_fn(real_img_score, gen_img_score)
+    def get_dataloader(self):
+        transform = transforms.Compose([transforms.ToTensor(),
+                                        transforms.Normalize([0.1307], [0.3081])])
+        real_data = MnistDataset(data_root=self.real_data_root, transform=transform)
+        real_loader = DataLoader(real_data,
+                                 batch_size=self.batch_size,
+                                 drop_last=True,
+                                 pin_memory=True)
+        print('real data has been loaded over!!')
 
-            # Backpropagation
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            pbar.update(1)
-            pbar.set_postfix(loss=f'{loss.item():>5f}')
+        noise_data = NoiseDataset(0, 1, 70000, [64, 64])
+        noise_loader = DataLoader(noise_data,
+                                  batch_size=self.batch_size,
+                                  drop_last=True,
+                                  pin_memory=True)
+        print('noise data has been loaded over!!')
 
-        loss = loss.item()
-        tqdm.write(f"discriminator loss: {loss:>7f}")
+        return real_loader, noise_loader
 
+    def get_gen_dataloader(self, gen_model, device):
+        gen_model.eval()
+        gen_images = []
+        num_batches = len(self.noise_loader)
 
-def train_generator(noise_dataloader,
-                    d_model,
-                    g_model,
-                    loss_fn,
-                    optimizer,
-                    device):
-    num_batches = len(noise_dataloader)
-    g_model.train()
-    with tqdm(total=num_batches) as pbar:
-        for batch, noise in enumerate(noise_dataloader):
-            noise = noise.to(device)
+        tqdm.write("generating fake images!")
+        with tqdm(total=num_batches) as pbar:
+            for _, noise in enumerate(self.noise_loader):
+                noise = noise.to(device)
+                gen_image = gen_model(noise)
+                gen_images.append(gen_image)
+                pbar.update(1)
 
-            # Compute prediction error
-            gen = g_model(noise)
-            gen_img_score = d_model(gen)
-            loss = loss_fn(gen_img_score)
+        gen_images = torch.cat(gen_images, dim=0)
+        gen_data = GenImage(gen_images, self.fake_img_size)
+        gen_dataloader = DataLoader(gen_data,
+                                    batch_size=self.batch_size,
+                                    drop_last=True,
+                                    pin_memory=True)
+        tqdm.write("generating over!\n")
 
-            # Backpropagation
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            pbar.update(1)
-            pbar.set_postfix(loss=f'{loss.item():>5f}')
-
-        loss = loss.item()
-        tqdm.write(f"generator loss: {loss:>7f}")
+        return gen_dataloader
 
 
-def get_dataloader(real_data_root, batch_size):
-    transform = transforms.Compose([transforms.ToTensor(),
-                                    transforms.Normalize([0.1307], [0.3081])])
-    real_data = MnistDataset(data_root=real_data_root, transform=transform)
-    real_loader = DataLoader(real_data,
-                             batch_size=batch_size,
-                             drop_last=True,
-                             pin_memory=True)
-    print('real data has been loaded over!!')
+class Model():
+    def __init__(self, loader: MyLoader, d_model, d_loss_fn, d_optimizer,
+                 g_model, g_loss_fn, g_optimizer, device):
+        self.loader = loader
+        self.device = device
 
-    noise_data = NoiseDataset(0, 1, 70000, [64, 64])
-    noise_loader = DataLoader(noise_data,
-                              batch_size=batch_size,
-                              drop_last=True,
-                              pin_memory=True)
-    print('noise data has been loaded over!!')
+        self.d_model = d_model.to(device)
+        self.d_loss_fn = d_loss_fn
+        self.d_optimizer = d_optimizer
 
-    return real_loader, noise_loader
+        self.g_model = g_model.to(device)
+        self.g_loss_fn = g_loss_fn
+        self.g_optimizer = g_optimizer
+
+    def train_discriminator(self, gen_loder):
+        # gen_loder = self.loader.get_gen_dataloader(self.g_model)
+
+        num_batches = len(self.loader.real_loader)
+        self.d_model.train()
+        with tqdm(total=num_batches) as pbar:
+            for _, (real, gen) in enumerate(zip(self.loader.real_loader, gen_loder)):
+                real, gen = real.to(self.device), gen.to(self.device)
+
+                # Compute prediction error
+                gen_img_score = self.d_model(gen)
+                # print(gen_img_score)
+                real_img_score = self.d_model(real)
+                # print(real_img_score)
+                # sys.exit()
+                loss = self.d_loss_fn(real_img_score, gen_img_score)
+
+                # Backpropagation
+                self.d_optimizer.zero_grad()
+                loss.backward()
+                self.d_optimizer.step()
+                pbar.update(1)
+                pbar.set_postfix(loss=f'{loss.item():>5f}')
+
+            loss = loss.item()
+            tqdm.write(f"discriminator loss: {loss:>7f}")
+
+    def train_generator(self):
+        num_batches = len(self.loader.noise_loader)
+        self.g_model.train()
+        with tqdm(total=num_batches) as pbar:
+            for batch, noise in enumerate(self.loader.noise_loader):
+                noise = noise.to(self.device)
+
+                # Compute prediction error
+                gen = self.g_model(noise)
+                gen_img_score = self.d_model(gen)
+                loss = self.g_loss_fn(gen_img_score)
+
+                # Backpropagation
+                self.g_optimizer.zero_grad()
+                loss.backward()
+                self.g_optimizer.step()
+                pbar.update(1)
+                pbar.set_postfix(loss=f'{loss.item():>5f}')
+
+            loss = loss.item()
+            tqdm.write(f"generator loss: {loss:>7f}")
 
 
-def run(gen_model,
-        gen_loss_fn,
-        gen_optimizer,
-        dis_model,
-        dis_loss_fn,
-        dis_optimizer,
-        real_loader,
-        noise_loader,
+def run(model: Model,
         t_epochs,
         d_epochs,
         g_epochs,
-        save_model_path,
-        device):
+        save_model_path):
     if not os.path.exists(save_model_path):
         os.mkdir(save_model_path)
     for t in range(t_epochs):
-        print("----------Training the {t + 1} time---------")
+        print(f"----------Training the {t + 1} time---------")
         print("training discriminator")
+        gen_loader = model.loader.get_gen_dataloader(model.g_model, model.device)
         for t in range(d_epochs):
             print(f"----------Epoch {t + 1} ---------")
-            train_discriminator(real_loader, noise_loader, dis_model,
-                                gen_model, dis_loss_fn, dis_optimizer, device)
-        print('\n\n')
-        print("training generator")
+            model.train_discriminator(gen_loader)
+        print("\ntraining generator")
         for t in range(g_epochs):
             print(f"----------Epoch {t + 1} ---------")
-            train_generator(noise_loader, dis_model, gen_model,
-                            gen_loss_fn, gen_optimizer, device)
+            model.train_generator()
         print('\n\n')
 
-        torch.save(gen_model.state_dict(),
+        torch.save(model.g_model.state_dict(),
                    os.path.join(save_model_path, f'gen_model_weights_{t + 1}.pth'))
-        torch.save(dis_model.state_dict(),
+        torch.save(model.d_model.state_dict(),
                    os.path.join(save_model_path, f'dis_model_weights_{t + 1}.pth'))
 
 
@@ -136,31 +158,28 @@ def main(data_root, t_epochs, d_epochs, g_epochs):
     if torch.cuda.is_available():
         device = 'cuda'
 
-    gen_model = Generator((28, 28), batch_size).to(device)
+    gen_model = Generator([28, 28], batch_size)
     gen_loss_fn = GeneratorLoss()
     gen_optimizer = torch.optim.Adam(gen_model.parameters(), lr=lr)
 
-    dis_model = Discriminator().to(device)
+    dis_model = Discriminator()
     dis_loss_fn = DiscriminatorLoss()
     dis_optimizer = torch.optim.Adam(dis_model.parameters(), lr=lr)
 
-    real_loader, noise_loader = get_dataloader(data_root, batch_size=batch_size)
+    loader = MyLoader(data_root, batch_size, [28, 28])
+    model = Model(loader, dis_model, dis_loss_fn, dis_optimizer,
+                  gen_model, gen_loss_fn, gen_optimizer, device)
 
     save_model_path = 'model'
 
-    run(gen_model, gen_loss_fn, gen_optimizer,
-        dis_model, dis_loss_fn, dis_optimizer,
-        real_loader, noise_loader,
-        t_epochs, d_epochs, g_epochs,
-        save_model_path,
-        device)
+    run(model, t_epochs, d_epochs, g_epochs, save_model_path)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_root',
                         type=str,
-                        required=True,
+                        default=r'E:\desktop\mnist',
                         help="where the dataset is")
 
     parser.add_argument('--t_epochs',
