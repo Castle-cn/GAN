@@ -36,12 +36,12 @@ class MyLoader:
 
 
 class Model:
-    def __init__(self, loader: MyLoader, batch_size, device):
+    def __init__(self, loader: MyLoader, device):
         self.loader = loader
         self.device = device
         self.lr = 1e-3
 
-        self.g_model = Generator([28, 28], batch_size).to(device)
+        self.g_model = Generator([28, 28]).to(device)
         self.g_loss_fn = GeneratorLoss()
         self.g_optimizer = torch.optim.Adam(self.g_model.parameters(), lr=self.lr)
 
@@ -128,7 +128,7 @@ def main(data_root, t_epochs, d_epochs, g_epochs):
         device = 'cuda'
 
     loader = MyLoader(data_root, batch_size, [28, 28])
-    model = Model(loader, batch_size, device)
+    model = Model(loader, device)
 
     save_model_path = 'model'
 

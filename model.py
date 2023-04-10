@@ -1,7 +1,3 @@
-import torch
-from torch import nn
-from torchvision import models
-import torch.nn.functional as F
 from torch import nn
 
 
@@ -69,15 +65,27 @@ class BuildingBlock(nn.Module):
         return x
 
 
+def make_layers(block, block_nums, in_channels, out_channels, stride):
+    downsample = None
+    if stride != 1 or in_channels != out_channels * block.expension:
+        downsample = nn.Conv2d(in_channels, out_channels * block.expension, kernel_size=1,
+                               stride=stride, padding=0)
+
+    layers = [block(in_channels, out_channels, stride, downsample)]
+    for _ in range(block_nums - 1):
+        layers.append(block(out_channels * block.expension, out_channels, 1, None))
+    return layers
+
+
 class ResNet(nn.Module):
 
     def __init__(self, block, block_nums, channels, classes_nums):
         super().__init__()
 
-        self.layer_1 = self.make_layers(block, block_nums[0], 64, 64, 1)
-        self.layer_2 = self.make_layers(block, block_nums[1], 64 * block.expension, 128, 2)
-        self.layer_3 = self.make_layers(block, block_nums[2], 128 * block.expension, 256, 2)
-        self.layer_4 = self.make_layers(block, block_nums[3], 256 * block.expension, 512, 2)
+        self.layer_1 = make_layers(block, block_nums[0], 64, 64, 1)
+        self.layer_2 = make_layers(block, block_nums[1], 64 * block.expension, 128, 2)
+        self.layer_3 = make_layers(block, block_nums[2], 128 * block.expension, 256, 2)
+        self.layer_4 = make_layers(block, block_nums[3], 256 * block.expension, 512, 2)
 
         self.stack = nn.Sequential(
             nn.Conv2d(channels, 64, kernel_size=7, stride=2, padding=3),
@@ -89,21 +97,9 @@ class ResNet(nn.Module):
             nn.AdaptiveAvgPool2d(1),
             nn.Flatten(),
             nn.Linear(block.expension * 512, classes_nums),
-            nn.Sigmoid(),   # [0,1]
-            nn.BatchNorm1d(classes_nums)    #[-1,1]
+            nn.Sigmoid(),  # [0,1]
+            nn.BatchNorm1d(classes_nums)  # [-1,1]
         )
-
-    def make_layers(self, block, block_nums, in_channels, out_channels, stride):
-        downsample = None
-        if stride != 1 or in_channels != out_channels * block.expension:
-            downsample = nn.Conv2d(in_channels, out_channels * block.expension, kernel_size=1,
-                                   stride=stride, padding=0)
-
-        layers = []
-        layers.append(block(in_channels, out_channels, stride, downsample))
-        for _ in range(block_nums - 1):
-            layers.append(block(out_channels * block.expension, out_channels, 1, None))
-        return layers
 
     def forward(self, x):
         # print(x.shape)
@@ -133,18 +129,17 @@ class SimpleNet(nn.Module):
 
 
 class Generator(nn.Module):
-    def __init__(self, img_size: list, batch_size):
+    def __init__(self, img_size: list):
         super().__init__()
         if len(img_size) > 2:
             raise ValueError("img_size should be (H,W) of the train image")
         self.H, self.W = img_size
-        self.batch_size = batch_size
         self.generator = ResNet(BuildingBlock, [2, 2, 2, 2], 1, self.H * self.W)  # 输出来的在[-1,1]之间
 
     # 输入x是随机噪声
     def forward(self, x):
         x = self.generator(x)  # 输出的就是图片打平后
-        return x.reshape((self.batch_size, 1, self.H, self.W))  # [batch,1,H,W]
+        return x.reshape((-1, 1, self.H, self.W))  # [batch,1,H,W]
 
 
 class Discriminator(nn.Module):

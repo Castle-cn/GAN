@@ -1,47 +1,38 @@
-import time
-from functools import reduce
-import torch.nn.functional as F
 import numpy as np
-from typing import Union
-from multiprocessing import Pool
+from model import Generator,Discriminator
+import torch.nn.functional as F
+from matplotlib import pyplot as plt
 
 import torch
-from torch import nn
-
-
-# 多参数用字典传递，写成这样
-# def gen_noise(args):
-#     args['size'].insert(0, args['num'])
-#     # return np.random.normal(loc=args['loc'], scale=args['scale'], size=args['size'])
-#     return torch.normal(args['loc'], args['scale'], size=args['size'])
-#
-#
-# def run_pool():
-#     cpu_worker_num = 4
-#     process_args = [{'num': 10000, 'loc': 0, 'scale': 1, 'size': [64, 64]}] * 7
-#
-#     t1 = time.time()
-#     with Pool(cpu_worker_num) as p:
-#         outputs = p.map(gen_noise, process_args)
-#     t2 = time.time()
-#     print(t2 - t1)
-#     return outputs
-
 
 # 主线程不建议写在 if外部。
 if __name__ == '__main__':
-    real_img_score = torch.flatten(torch.asarray([[0.1],[0.3]]))
-    b = torch.ones_like(real_img_score)
-    real_loss = F.cross_entropy(torch.ones_like(real_img_score), real_img_score)
-    print(real_loss)
 
-# t1 = time.time()
-# # # a = torch.normal(0, 1, size=(70000, 224, 224))
-# # a = np.random.normal(loc=0, scale=1, size=(35000, 64, 64)).astype('float32')
-# # b = np.random.normal(loc=0, scale=1, size=(35000, 64, 64)).astype('float32')
-# # c = np.concatenate((a,b),axis=0)
-# x = np.zeros((70000, 64, 64), dtype='float32')
-# x = np.random.normal(loc=0, scale=1, size=x.shape)
-# t2 = time.time()
-#
-# print(t2 - t1)
+    device = 'cpu'
+    if torch.cuda.is_available():
+        device = 'cuda'
+
+    discriminator = Discriminator().to(device)
+    discriminator.load_state_dict(torch.load('E:\desktop\dis_model_weights_4.pth'))
+    discriminator.eval()
+
+    generator = Generator([28, 28]).to(device)
+    generator.load_state_dict(torch.load('E:\desktop\gen_model_weights_4.pth'))
+    generator.eval()
+    noise = torch.normal(mean=0, std=1, size=[10, 1, 64, 64]).to(device)
+
+    gen = generator(noise)
+    score = discriminator(gen)
+
+    gen = (gen.cpu().detach().numpy() + 1) / 2
+    # print(gen.shape)
+
+
+    score = torch.flatten(score)
+    gen_loss = F.mse_loss(torch.ones_like(score), score)
+    print(torch.ones_like(score))
+    print(score)
+    print(gen_loss)
+
+    plt.imshow(gen[0].squeeze(), cmap='gray')
+    plt.show()
