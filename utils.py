@@ -9,10 +9,10 @@ class DiscriminatorLoss(nn.Module):
         super().__init__()
 
     def forward(self, real_img_score, gen_img_score):
-        real_img_score = torch.flatten(real_img_score)
-        gen_img_score = torch.flatten(gen_img_score)
-        real_loss = F.binary_cross_entropy_with_logits(real_img_score, torch.ones_like(real_img_score))
-        gen_loss = F.binary_cross_entropy_with_logits(gen_img_score, torch.zeros_like(gen_img_score))
+        real_img_score = torch.sigmoid(torch.flatten(real_img_score))
+        gen_img_score = torch.sigmoid(torch.flatten(gen_img_score))
+        real_loss = F.binary_cross_entropy(real_img_score, torch.ones_like(real_img_score))
+        gen_loss = F.binary_cross_entropy(gen_img_score, torch.zeros_like(gen_img_score))
 
         return real_loss + gen_loss
 
@@ -22,6 +22,6 @@ class GeneratorLoss(nn.Module):
         super().__init__()
 
     def forward(self, gen_img_score):
-        gen_img_score = torch.flatten(gen_img_score)
-        gen_loss = F.binary_cross_entropy_with_logits(gen_img_score, torch.ones_like(gen_img_score))
+        gen_img_score = torch.sigmoid(torch.flatten(gen_img_score))
+        gen_loss = F.binary_cross_entropy(gen_img_score, torch.ones_like(gen_img_score))
         return gen_loss
