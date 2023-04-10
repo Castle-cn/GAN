@@ -89,8 +89,8 @@ class ResNet(nn.Module):
             nn.AdaptiveAvgPool2d(1),
             nn.Flatten(),
             nn.Linear(block.expension * 512, classes_nums),
-            nn.Sigmoid(),
-            nn.BatchNorm1d(classes_nums)
+            nn.Sigmoid(),   # [0,1]
+            nn.BatchNorm1d(classes_nums)    #[-1,1]
         )
 
     def make_layers(self, block, block_nums, in_channels, out_channels, stride):
@@ -141,7 +141,7 @@ class Generator(nn.Module):
         self.batch_size = batch_size
         self.generator = ResNet(BuildingBlock, [2, 2, 2, 2], 1, self.H * self.W)  # 输出来的在[-1,1]之间
 
-    # 输入x是随机噪声，大小为224*224
+    # 输入x是随机噪声
     def forward(self, x):
         x = self.generator(x)  # 输出的就是图片打平后
         return x.reshape((self.batch_size, 1, self.H, self.W))  # [batch,1,H,W]

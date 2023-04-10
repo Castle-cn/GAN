@@ -17,7 +17,6 @@ class MyLoader:
         self.real_loader, self.noise_loader = self.get_dataloader()
 
     def get_dataloader(self):
-        # transform = transforms.ToTensor()
         transform = transforms.Compose([transforms.ToTensor(),
                                         transforms.Normalize([0.1307], [0.3081])])
         real_data = MnistDataset(data_root=self.real_data_root, transform=transform)
@@ -33,28 +32,6 @@ class MyLoader:
         print('noise data has been loaded over!!')
 
         return real_loader, noise_loader
-
-    # def get_gen_dataloader(self, gen_model, device):
-    #     gen_model.eval()
-    #     gen_images = []
-    #     num_batches = len(self.noise_loader)
-    #
-    #     tqdm.write("generating fake images!")
-    #     with tqdm(total=num_batches) as pbar:
-    #         for _, noise in enumerate(self.noise_loader):
-    #             noise = noise.to(device)
-    #             gen_image = gen_model(noise)
-    #             gen_images.append(gen_image)
-    #             pbar.update(1)
-    #
-    #     gen_images = torch.cat(gen_images, dim=0)
-    #     gen_data = GenImage(gen_images, self.fake_img_size)
-    #     gen_dataloader = DataLoader(gen_data,
-    #                                 batch_size=self.batch_size,
-    #                                 drop_last=True)
-    #     tqdm.write("generating over!\n")
-    #
-    #     return gen_dataloader
 
 
 class Model:
