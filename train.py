@@ -6,11 +6,10 @@ from tqdm import tqdm
 import os
 from torch.utils.data import DataLoader
 import argparse
-from dataset import MnistDataset, NoiseDataset, GenImage
-import sys
+from dataset import MnistDataset, NoiseDataset
 
 
-class MyLoader():
+class MyLoader:
     def __init__(self, real_data_root, batch_size, fake_img_size: list):
         self.real_data_root = real_data_root
         self.batch_size = batch_size
@@ -34,30 +33,30 @@ class MyLoader():
 
         return real_loader, noise_loader
 
-    def get_gen_dataloader(self, gen_model, device):
-        gen_model.eval()
-        gen_images = []
-        num_batches = len(self.noise_loader)
+    # def get_gen_dataloader(self, gen_model, device):
+    #     gen_model.eval()
+    #     gen_images = []
+    #     num_batches = len(self.noise_loader)
+    #
+    #     tqdm.write("generating fake images!")
+    #     with tqdm(total=num_batches) as pbar:
+    #         for _, noise in enumerate(self.noise_loader):
+    #             noise = noise.to(device)
+    #             gen_image = gen_model(noise)
+    #             gen_images.append(gen_image)
+    #             pbar.update(1)
+    #
+    #     gen_images = torch.cat(gen_images, dim=0)
+    #     gen_data = GenImage(gen_images, self.fake_img_size)
+    #     gen_dataloader = DataLoader(gen_data,
+    #                                 batch_size=self.batch_size,
+    #                                 drop_last=True)
+    #     tqdm.write("generating over!\n")
+    #
+    #     return gen_dataloader
 
-        tqdm.write("generating fake images!")
-        with tqdm(total=num_batches) as pbar:
-            for _, noise in enumerate(self.noise_loader):
-                noise = noise.to(device)
-                gen_image = gen_model(noise)
-                gen_images.append(gen_image)
-                pbar.update(1)
 
-        gen_images = torch.cat(gen_images, dim=0)
-        gen_data = GenImage(gen_images, self.fake_img_size)
-        gen_dataloader = DataLoader(gen_data,
-                                    batch_size=self.batch_size,
-                                    drop_last=True)
-        tqdm.write("generating over!\n")
-
-        return gen_dataloader
-
-
-class Model():
+class Model:
     def __init__(self, loader: MyLoader, d_model, d_loss_fn, d_optimizer,
                  g_model, g_loss_fn, g_optimizer, device):
         self.loader = loader
@@ -71,21 +70,21 @@ class Model():
         self.g_loss_fn = g_loss_fn
         self.g_optimizer = g_optimizer
 
-    def train_discriminator(self, gen_loder):
-        # gen_loder = self.loader.get_gen_dataloader(self.g_model)
-
+    def train_discriminator(self):
         num_batches = len(self.loader.real_loader)
         self.d_model.train()
         with tqdm(total=num_batches) as pbar:
-            for _, (real, gen) in enumerate(zip(self.loader.real_loader, gen_loder)):
-                real, gen = real.to(self.device), gen.to(self.device)
+            for _, (real, noise) in enumerate(zip(self.loader.real_loader, self.loader.noise_loader)):
+                real, noise = real.to(self.device), noise.to(self.device)
 
-                # Compute prediction error
+                gen = self.g_model(noise)
+                # normalize the fake images
+                mean = torch.mean(gen)
+                std = torch.std(gen)
+                gen = (gen - mean) / std
+
                 gen_img_score = self.d_model(gen)
-                # print(gen_img_score)
                 real_img_score = self.d_model(real)
-                # print(real_img_score)
-                # sys.exit()
                 loss = self.d_loss_fn(real_img_score, gen_img_score)
 
                 # Backpropagation
@@ -131,13 +130,13 @@ def run(model: Model,
     for t in range(t_epochs):
         print(f"----------Training the {t + 1} time---------")
         print("training discriminator")
-        gen_loader = model.loader.get_gen_dataloader(model.g_model, model.device)
-        for t in range(d_epochs):
-            print(f"----------Epoch {t + 1} ---------")
-            model.train_discriminator(gen_loader)
+        # gen_loader = model.loader.get_gen_dataloader(model.g_model, model.device)
+        for d in range(d_epochs):
+            print(f"----------Epoch {d + 1} ---------")
+            model.train_discriminator()
         print("\ntraining generator")
-        for t in range(g_epochs):
-            print(f"----------Epoch {t + 1} ---------")
+        for g in range(g_epochs):
+            print(f"----------Epoch {g + 1} ---------")
             model.train_generator()
         print('\n\n')
 

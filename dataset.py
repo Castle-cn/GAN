@@ -73,17 +73,17 @@ class NoiseDataset(Dataset):
         return outputs
 
 
-class GenImage(Dataset):
-    # img_size 是生成的图片的大小
-    def __init__(self, gen_images, img_size: list):
-        mean = torch.mean(gen_images)
-        std = torch.std(gen_images)
-        gen_images = (gen_images - mean) / std
-        self.images = gen_images.reshape((len(gen_images), 1, img_size[0], img_size[1]))
-
-    def __len__(self):
-        return len(self.images)
-
-    def __getitem__(self, index):
-        image = self.images[index]
-        return image
+# class GenImage(Dataset):
+#     # img_size 是生成的图片的大小
+#     def __init__(self, gen_images, img_size: list):
+#         mean = torch.mean(gen_images)
+#         std = torch.std(gen_images)
+#         gen_images = (gen_images - mean) / std
+#         self.images = gen_images.reshape((len(gen_images), 1, img_size[0], img_size[1]))
+#
+#     def __len__(self):
+#         return len(self.images)
+#
+#     def __getitem__(self, index):
+#         image = self.images[index]
+#         return image

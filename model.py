@@ -154,8 +154,7 @@ class Generator(nn.Module):
     def forward(self, x):
         x = self.generator(x)  # 输出的就是图片打平后
         x = torch.round(F.normalize(x, dim=1) * 255)
-        # return x.reshape((self.batch_size, 1, self.H, self.W))
-        return x
+        return x.reshape((self.batch_size, 1, self.H, self.W))
 
 class Discriminator(nn.Module):
     def __init__(self):

@@ -29,14 +29,10 @@ def run_pool():
 
 # 主线程不建议写在 if外部。
 if __name__ == '__main__':
-    # a = torch.asarray([[1, 2, 3]])
-    # b = torch.asarray([[2, 2, 2]])
-    # c = torch.asarray([[3, 3, 3]])
-    # d = [a, b, c]
-    # w = torch.cat(d,dim=0)
-    # print(w)
-    a = torch.asarray([1.1,2.1,3])
-    print(torch.round(a))
+    a = torch.zeros((2,3,3,3))
+    mean = torch.mean(a[:,0,...])
+    std = torch.std(a)
+    print(mean,std)
 
 # t1 = time.time()
 # # # a = torch.normal(0, 1, size=(70000, 224, 224))
