@@ -89,7 +89,8 @@ class ResNet(nn.Module):
             nn.AdaptiveAvgPool2d(1),
             nn.Flatten(),
             nn.Linear(block.expension * 512, classes_nums),
-            # nn.Softmax(dim=1)
+            nn.Sigmoid(),
+            nn.BatchNorm1d(classes_nums)
         )
 
     def make_layers(self, block, block_nums, in_channels, out_channels, stride):
@@ -147,17 +148,22 @@ class SimpleNet(nn.Module):
     def __init__(self, in_feature, num_class):
         super().__init__()
         self.stack = nn.Sequential(
-            nn.Linear(in_feature, 1024),
-            nn.BatchNorm1d(1024),
-            nn.Linear(1024, 1024),
-            nn.BatchNorm1d(1024),
-            nn.Linear(1024, num_class),
+            nn.Flatten(),
+            nn.Linear(in_feature, 512),
+            nn.BatchNorm1d(512),
+            nn.LeakyReLU(),
+
+            nn.Linear(512, 256),
+            nn.BatchNorm1d(256),
+            nn.LeakyReLU(),
+
+            nn.Linear(1, num_class),
             nn.Sigmoid()
         )
 
     def forward(self, x):
-        B, C, H, W = x.shape
-        x = torch.reshape(x, [B, C * H * W])
+        # B, C, H, W = x.shape
+        # x = torch.reshape(x, [B, C * H * W])
         return self.stack(x)
 
 
@@ -168,7 +174,7 @@ class Generator(nn.Module):
             raise ValueError("img_size should be (H,W) of the train image")
         self.H, self.W = img_size
         self.batch_size = batch_size
-        self.generator = ResNet(BuildingBlock, [2, 2, 2, 2], 1, self.H * self.W)
+        self.generator = ResNet(BuildingBlock, [2, 2, 2, 2], 1, self.H * self.W) #输出来的在[-1,1]之间
 
     # 输入x是随机噪声，大小为224*224
     def forward(self, x):
@@ -180,8 +186,8 @@ class Generator(nn.Module):
 class Discriminator(nn.Module):
     def __init__(self):
         super().__init__()
-        self.discriminator = LeNet(1, 1)
-        # self.discriminator = SimpleNet(28 * 28, 1)
+        # self.discriminator = LeNet(1, 1)
+        self.discriminator = SimpleNet(28 * 28, 1) # 输出的在[0,1]之间
 
     def forward(self, x):
         x = self.discriminator(x)
