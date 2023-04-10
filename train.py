@@ -23,15 +23,13 @@ class MyLoader():
         real_data = MnistDataset(data_root=self.real_data_root, transform=transform)
         real_loader = DataLoader(real_data,
                                  batch_size=self.batch_size,
-                                 drop_last=True,
-                                 pin_memory=True)
+                                 drop_last=True)
         print('real data has been loaded over!!')
 
         noise_data = NoiseDataset(0, 1, 10000, [64, 64])
         noise_loader = DataLoader(noise_data,
                                   batch_size=self.batch_size,
-                                  drop_last=True,
-                                  pin_memory=True)
+                                  drop_last=True)
         print('noise data has been loaded over!!')
 
         return real_loader, noise_loader
@@ -53,8 +51,7 @@ class MyLoader():
         gen_data = GenImage(gen_images, self.fake_img_size)
         gen_dataloader = DataLoader(gen_data,
                                     batch_size=self.batch_size,
-                                    drop_last=True,
-                                    pin_memory=True)
+                                    drop_last=True)
         tqdm.write("generating over!\n")
 
         return gen_dataloader
