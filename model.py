@@ -25,6 +25,7 @@ class Generator(nn.Module):
 class Discriminator(nn.Module):
     def __init__(self, d_input_dim):
         super(Discriminator, self).__init__()
+        self.flatten = nn.Flatten()
         self.fc1 = nn.Linear(d_input_dim, 1024)
         self.fc2 = nn.Linear(self.fc1.out_features, self.fc1.out_features // 2)
         self.fc3 = nn.Linear(self.fc2.out_features, self.fc2.out_features // 2)
@@ -32,6 +33,7 @@ class Discriminator(nn.Module):
 
     # forward method
     def forward(self, x):
+        x = self.flatten(x)
         x = F.leaky_relu(self.fc1(x), 0.2)
         x = F.dropout(x, 0.3)
         x = F.leaky_relu(self.fc2(x), 0.2)

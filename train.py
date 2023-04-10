@@ -6,6 +6,7 @@ from tqdm import tqdm
 import os
 from torch.utils.data import DataLoader
 import argparse
+import sys
 from dataset import MnistDataset, NoiseDataset
 
 
@@ -58,7 +59,6 @@ class Model:
                 gen_img_score = self.d_model(gen)
                 real_img_score = self.d_model(real)
                 loss = self.d_loss_fn(real_img_score, gen_img_score)
-
                 # Backpropagation
                 self.d_optimizer.zero_grad()
                 loss.backward()

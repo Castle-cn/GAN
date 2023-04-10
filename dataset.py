@@ -27,7 +27,7 @@ class MnistDataset(Dataset):
 
     # 获取指定index的数据
     def __getitem__(self, idx):
-        image = self.images[idx]
+        image = self.images[idx].reshape((28, 28))
         # transform固定写法, 基本不变
         if self.transform:
             image = self.transform(image)
