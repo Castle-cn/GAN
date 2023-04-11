@@ -12,13 +12,13 @@ class Generator(nn.Module):
         self.stack = nn.Sequential(
             nn.Linear(in_dims, 128),
             # nn.BatchNorm1d(128),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.Linear(128, 256),
             # nn.BatchNorm1d(256),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.Linear(256, 512),
             # nn.BatchNorm1d(512),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),
             nn.Linear(512, np.prod(img_size).item()),
             nn.Tanh()  # 输出在-1到1之间
         )
@@ -36,10 +36,10 @@ class Discriminator(nn.Module):
         self.stack = nn.Sequential(
             nn.Linear(np.prod(img_size).item(), 256),
             # nn.BatchNorm1d(512),
-            nn.LeakyReLU(inplace=True),
+            nn.LeakyReLU(),
             nn.Linear(256, 128),
             # nn.BatchNorm1d(256),
-            nn.LeakyReLU(inplace=True),
+            nn.LeakyReLU(),
             # nn.Linear(256, 128),
             # nn.BatchNorm1d(128),
             # nn.LeakyReLU(inplace=True),
