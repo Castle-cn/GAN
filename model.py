@@ -10,12 +10,7 @@ class Generator(nn.Module):
         super(Generator, self).__init__()
 
         self.stack = nn.Sequential(
-            nn.Linear(in_dims, 64),
-            nn.BatchNorm1d(64),
-            nn.LeakyReLU(inplace=True),
-            nn.Linear(64, 128),
-            nn.BatchNorm1d(128),
-            nn.LeakyReLU(inplace=True),
+            nn.Linear(in_dims, 128),
             nn.Linear(128, 256),
             nn.BatchNorm1d(256),
             nn.LeakyReLU(inplace=True),
