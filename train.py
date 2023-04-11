@@ -92,14 +92,14 @@ def run(model: Model,
         print(f"----------Training the {i + 1} time---------")
         # 学习率衰减
         if (i + 1) % 15 == 0:
-            model.g_lr = model.g_lr * 0.1
+            model.g_lr = model.g_lr * 2
             for param_group in model.g_optimizer.param_groups:
                 param_group['lr'] = model.g_lr
 
         fake_imgs = model.train()
         if (i + 1) % 10 == 0:
             save_image(fake_imgs, os.path.join(save_pic_path, f'{i + 1}.png'))
-        if (i + 1) % 40 == 0:
+        if (i + 1) % 20 == 0:
             torch.save(model.g_model.state_dict(),
                        os.path.join(save_model_path, f'gen_model_weights_{i + 1}.pth'))
             torch.save(model.d_model.state_dict(),
