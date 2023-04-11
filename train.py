@@ -54,13 +54,13 @@ class Model:
                 # target_ones = torch.ones(self.loader.batch_size, 1).to(self.device)
                 # target_zeros = torch.zeros(self.loader.batch_size, 1).to(self.device)
 
-                fake_imgs = self.g_model(noise)
+                fake_imgs = self.g_model(noise.clone())
 
                 # 训练generator
                 self.d_model.eval()
                 self.g_model.train()
                 self.g_optimizer.zero_grad()
-                g_loss = -torch.mean(self.d_model(fake_imgs))  # wgan loss
+                g_loss = -torch.mean(self.d_model(fake_imgs.clone()))  # wgan loss
                 g_loss.backward(retain_graph=True)
                 self.g_optimizer.step()
 
@@ -68,7 +68,7 @@ class Model:
                 self.d_model.train()
                 self.g_model.eval()
                 self.d_optimizer.zero_grad()
-                d_loss = -torch.mean(self.d_model(real_imgs) - self.d_model(fake_imgs))  # wgan loss
+                d_loss = -torch.mean(self.d_model(real_imgs.clone()) - self.d_model(fake_imgs.clone()))  # wgan loss
                 d_loss.backward(retain_graph=True)
                 self.d_optimizer.step()
 
