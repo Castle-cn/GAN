@@ -74,7 +74,7 @@ class Model:
 
                 # 梯度裁剪
                 for p in self.d_model.parameters():
-                    p.data.clamp_(-0.01, 0.01)
+                    p.data = p.data.clamp(-0.01, 0.01)
 
                 pbar.update(1)
 
