@@ -1,5 +1,7 @@
 import os
 import struct
+import torch
+import torchvision.transforms
 from torch.utils.data import Dataset
 import numpy as np
 
@@ -17,8 +19,8 @@ class MnistDataset(Dataset):
         # 改这里记得把train里面noise生成的数目改了
         self.train_img_dir = os.path.join(data_root, 'train-images.idx3-ubyte')
         self.test_img_dir = os.path.join(data_root, 't10k-images.idx3-ubyte')
-        self.images = np.concatenate([read_image(self.test_img_dir),
-                                      read_image(self.train_img_dir)])
+        self.images = np.concatenate([read_image(self.test_img_dir), read_image(self.train_img_dir)])
+        # self.images = np.concatenate([read_image(self.test_img_dir)])
         self.transform = transform
 
     # 获取数据集大小
@@ -32,3 +34,8 @@ class MnistDataset(Dataset):
         if self.transform:
             image = self.transform(image)
         return image
+
+
+a = torch.zeros(size=(3,1,2,2))
+print(a)
+print((a+1)/2)

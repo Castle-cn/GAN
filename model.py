@@ -11,16 +11,14 @@ class Generator(nn.Module):
 
         self.stack = nn.Sequential(
             nn.Linear(in_dims, 64),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(inplace=True),
             nn.Linear(64, 128),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(inplace=True),
             nn.Linear(128, 256),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(inplace=True),
             nn.Linear(256, 512),
-            nn.ReLU(inplace=True),
-            nn.Linear(512, 1024),
-            nn.ReLU(inplace=True),
-            nn.Linear(1024, np.prod(img_size).item()),
+            nn.LeakyReLU(inplace=True),
+            nn.Linear(512, np.prod(img_size).item()),
             nn.Tanh()  # 输出在-1到1之间
         )
 
@@ -35,11 +33,14 @@ class Discriminator(nn.Module):
     def __init__(self):
         super(Discriminator, self).__init__()
         self.stack = nn.Sequential(
-            nn.Linear(np.prod(img_size).item(), 1024),
-            nn.ReLU(inplace=True),
-            nn.Linear(1024, 512),
-            nn.ReLU(inplace=True),
-            nn.Linear(512, 1),
+            nn.Linear(np.prod(img_size).item(), 512),
+            nn.LeakyReLU(inplace=True),
+            nn.Linear(512, 256),
+            nn.LeakyReLU(inplace=True),
+            nn.Linear(256, 128),
+            nn.LeakyReLU(inplace=True),
+            nn.Linear(128, 1),
+            # nn.LeakyReLU(inplace=True),
             nn.Sigmoid()
         )
 

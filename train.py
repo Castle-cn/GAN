@@ -17,9 +17,8 @@ class MyLoader:
         self.real_loader = self.get_dataloader()
 
     def get_dataloader(self):
-        # transform = transforms.Compose([transforms.ToTensor()])
         transform = transforms.Compose([transforms.ToTensor(),
-                                        transforms.Normalize([0.1307], [0.3081])])
+                                        transforms.Normalize([0.5], [0.5])])
         real_data = MnistDataset(data_root=self.real_data_root, transform=transform)
         real_loader = DataLoader(real_data,
                                  batch_size=self.batch_size,
@@ -77,7 +76,7 @@ class Model:
             tqdm.write(f"d_loss: {d_loss / self.loader.batch_size:>5f} || "
                        f"g_loss: {g_loss / self.loader.batch_size:>5f}")
 
-        return fake_imgs
+        return (fake_imgs + 1) / 2
 
 
 def run(model: Model,
