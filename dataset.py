@@ -1,7 +1,5 @@
 import os
 import struct
-import torch
-import torchvision.transforms
 from torch.utils.data import Dataset
 import numpy as np
 
