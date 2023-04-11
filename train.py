@@ -65,7 +65,7 @@ class Model:
                 self.g_model.train()
                 self.g_optimizer.zero_grad()
                 g_loss = self.g_loss_fn(self.d_model(fake_imgs))  # wgan loss
-                g_loss.backward()
+                g_loss.backward(retain_graph=True)
                 self.g_optimizer.step()
 
                 # 训练discriminator
@@ -73,7 +73,7 @@ class Model:
                 self.g_model.eval()
                 self.d_optimizer.zero_grad()
                 d_loss = self.d_loss_fn(self.d_model(real_imgs), self.d_model(fake_imgs))  # wgan loss
-                d_loss.backward()
+                d_loss.backward(retain_graph=True)
                 self.d_optimizer.step()
 
                 # 梯度裁剪
