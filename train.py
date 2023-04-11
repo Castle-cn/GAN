@@ -33,7 +33,7 @@ class Model:
         self.loader = loader
         self.device = device
         self.d_lr = 1e-5
-        self.g_lr = 1e-5
+        self.g_lr = 1e-4
         self.noise_dims = 10
         self.loss_fn = nn.BCELoss()
 
@@ -90,6 +90,12 @@ def run(model: Model,
 
     for i in range(epochs):
         print(f"----------Training the {i + 1} time---------")
+        # 学习率衰减
+        if (i + 1) % 15 == 0:
+            model.g_lr = model.g_lr * 0.1
+            for param_group in model.g_optimizer.param_groups:
+                param_group['lr'] = model.g_lr
+
         fake_imgs = model.train()
         if (i + 1) % 10 == 0:
             save_image(fake_imgs, os.path.join(save_pic_path, f'{i + 1}.png'))
