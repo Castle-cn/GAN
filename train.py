@@ -58,22 +58,22 @@ class Model:
                 # target_ones = torch.ones(self.loader.batch_size, 1).to(self.device)
                 # target_zeros = torch.zeros(self.loader.batch_size, 1).to(self.device)
 
-                # 训练generator
-                self.d_model.eval()
-                self.g_model.train()
-                fake_imgs = self.g_model(noise)
-                self.g_optimizer.zero_grad()
-                g_loss = self.g_loss_fn(self.d_model(fake_imgs))  # wgan loss
-                g_loss.backward(retain_graph=True)
-                self.g_optimizer.step()
-
                 # 训练discriminator
                 self.d_model.train()
                 self.g_model.eval()
+                fake_imgs = self.g_model(noise)
                 self.d_optimizer.zero_grad()
                 d_loss = self.d_loss_fn(self.d_model(real_imgs), self.d_model(fake_imgs))  # wgan loss
-                d_loss.backward()
+                d_loss.backward(retain_graph=True)
                 self.d_optimizer.step()
+
+                # 训练generator
+                self.d_model.eval()
+                self.g_model.train()
+                self.g_optimizer.zero_grad()
+                g_loss = self.g_loss_fn(self.d_model(fake_imgs))  # wgan loss
+                g_loss.backward()
+                self.g_optimizer.step()
 
                 # 梯度裁剪
                 for p in self.d_model.parameters():
@@ -120,6 +120,7 @@ def main(data_root, epochs):
     device = 'cpu'
     if torch.cuda.is_available():
         device = 'cuda'
+    print(device)
 
     loader = MyLoader(data_root, batch_size)
     model = Model(loader, device)
@@ -139,7 +140,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--epochs',
                         type=int,
-                        default=200)
+                        default=100)
 
     args = parser.parse_args()
 
