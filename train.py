@@ -32,8 +32,8 @@ class Model:
     def __init__(self, loader: MyLoader, device):
         self.loader = loader
         self.device = device
-        self.d_lr = 1e-4
-        self.g_lr = 1e-4
+        self.d_lr = 1e-5
+        self.g_lr = 1e-5
         self.noise_dims = 10
         self.loss_fn = nn.BCELoss()
 
