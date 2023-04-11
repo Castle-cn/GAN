@@ -20,18 +20,18 @@ class GeneratorLoss(nn.Module):
         gen_loss = torch.mean(gen_img_score)
         return -gen_loss
 
-
-d = DiscriminatorLoss()
-g = GeneratorLoss()
-
-for i in range(2):
-    data_1 = torch.randn(size=(32, 1),requires_grad=True)
-    data_2 = torch.randn(size=(32, 1),requires_grad=True)
-
-    loss_1 = d(data_1,data_2)
-    loss_1.backward()
-    loss_2 = g(data_2)
-    loss_2.backward()
+#
+# d = DiscriminatorLoss()
+# g = GeneratorLoss()
+#
+# for i in range(2):
+#     data_1 = torch.randn(size=(32, 1),requires_grad=True)
+#     data_2 = torch.randn(size=(32, 1),requires_grad=True)
+#
+#     loss_1 = d(data_1,data_2)
+#     loss_1.backward()
+#     loss_2 = g(data_2)
+#     loss_2.backward()
 
 
 
