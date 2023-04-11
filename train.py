@@ -32,16 +32,18 @@ class Model:
     def __init__(self, loader: MyLoader, device):
         self.loader = loader
         self.device = device
-        self.d_lr = 1e-5
+        self.d_lr = 1e-4
         self.g_lr = 1e-4
         self.noise_dims = 10
-        self.loss_fn = nn.BCELoss()
+        # self.loss_fn = nn.BCELoss()
 
         self.g_model = Generator(self.noise_dims).to(device)
-        self.g_optimizer = torch.optim.Adam(self.g_model.parameters(), lr=self.g_lr)
+        # self.g_optimizer = torch.optim.Adam(self.g_model.parameters(), lr=self.g_lr)
+        self.g_optimizer = torch.optim.RMSprop(self.g_model.parameters(), lr=self.g_lr)  # 更换训练器
 
         self.d_model = Discriminator().to(device)
-        self.d_optimizer = torch.optim.Adam(self.d_model.parameters(), lr=self.d_lr)
+        # self.d_optimizer = torch.optim.Adam(self.d_model.parameters(), lr=self.d_lr)
+        self.d_optimizer = torch.optim.RMSprop(self.d_model.parameters(), lr=self.d_lr)  # 更换训练器
 
     def train(self):
         num_batches = len(self.loader.real_loader)
@@ -49,8 +51,8 @@ class Model:
             for _, real_imgs in enumerate(self.loader.real_loader):
                 real_imgs = real_imgs.to(self.device)
                 noise = torch.randn(size=(self.loader.batch_size, self.noise_dims)).to(self.device)
-                target_ones = torch.ones(self.loader.batch_size, 1).to(self.device)
-                target_zeros = torch.zeros(self.loader.batch_size, 1).to(self.device)
+                # target_ones = torch.ones(self.loader.batch_size, 1).to(self.device)
+                # target_zeros = torch.zeros(self.loader.batch_size, 1).to(self.device)
 
                 fake_imgs = self.g_model(noise)
 
@@ -58,7 +60,7 @@ class Model:
                 self.d_model.eval()
                 self.g_model.train()
                 self.g_optimizer.zero_grad()
-                g_loss = self.loss_fn(self.d_model(fake_imgs), target_ones)
+                g_loss = -torch.mean(self.d_model(fake_imgs))  # wgan loss
                 g_loss.backward()
                 self.g_optimizer.step()
 
@@ -66,10 +68,13 @@ class Model:
                 self.d_model.train()
                 self.g_model.eval()
                 self.d_optimizer.zero_grad()
-                d_loss = 0.5 * (self.loss_fn(self.d_model(real_imgs), target_ones)) + \
-                         0.5 * (self.loss_fn(self.d_model(fake_imgs.detach()), target_zeros))
+                d_loss = -torch.mean(self.d_model(real_imgs) - self.d_model(fake_imgs))  # wgan loss
                 d_loss.backward()
                 self.d_optimizer.step()
+
+                # 梯度裁剪
+                for p in self.d_model.parameters():
+                    p.data.clamp_(-0.01, 0.01)
 
                 pbar.update(1)
 
