@@ -34,8 +34,3 @@ class MnistDataset(Dataset):
         if self.transform:
             image = self.transform(image)
         return image
-
-
-a = torch.zeros(size=(3,1,2,2))
-print(a)
-print((a+1)/2)
