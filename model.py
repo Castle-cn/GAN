@@ -11,6 +11,8 @@ class Generator(nn.Module):
 
         self.stack = nn.Sequential(
             nn.Linear(in_dims, 128),
+            nn.BatchNorm1d(128),
+            nn.LeakyReLU(inplace=True),
             nn.Linear(128, 256),
             nn.BatchNorm1d(256),
             nn.LeakyReLU(inplace=True),
@@ -32,10 +34,7 @@ class Discriminator(nn.Module):
     def __init__(self):
         super(Discriminator, self).__init__()
         self.stack = nn.Sequential(
-            nn.Linear(np.prod(img_size).item(), 512),
-            nn.BatchNorm1d(512),
-            nn.LeakyReLU(inplace=True),
-            nn.Linear(512, 256),
+            nn.Linear(np.prod(img_size).item(), 256),
             nn.BatchNorm1d(256),
             nn.LeakyReLU(inplace=True),
             nn.Linear(256, 128),
