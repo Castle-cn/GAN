@@ -6,6 +6,7 @@ import os
 from torch.utils.data import DataLoader
 import argparse
 import torch.nn as nn
+from utils import DiscriminatorLoss, GeneratorLoss
 from torchvision.utils import save_image
 from dataset import MnistDataset
 
@@ -35,7 +36,10 @@ class Model:
         self.d_lr = 1e-4
         self.g_lr = 1e-4
         self.noise_dims = 10
+
         # self.loss_fn = nn.BCELoss()
+        self.g_loss_fn = GeneratorLoss()
+        self.d_loss_fn = DiscriminatorLoss()
 
         self.g_model = Generator(self.noise_dims).to(device)
         # self.g_optimizer = torch.optim.Adam(self.g_model.parameters(), lr=self.g_lr)
@@ -54,22 +58,22 @@ class Model:
                 # target_ones = torch.ones(self.loader.batch_size, 1).to(self.device)
                 # target_zeros = torch.zeros(self.loader.batch_size, 1).to(self.device)
 
-                fake_imgs = self.g_model(noise.clone())
+                fake_imgs = self.g_model(noise)
 
                 # 训练generator
                 self.d_model.eval()
                 self.g_model.train()
                 self.g_optimizer.zero_grad()
-                g_loss = -torch.mean(self.d_model(fake_imgs.clone()))  # wgan loss
-                g_loss.backward(retain_graph=True)
+                g_loss = self.g_loss_fn(self.d_model(fake_imgs))  # wgan loss
+                g_loss.backward()
                 self.g_optimizer.step()
 
                 # 训练discriminator
                 self.d_model.train()
                 self.g_model.eval()
                 self.d_optimizer.zero_grad()
-                d_loss = -torch.mean(self.d_model(real_imgs.clone()) - self.d_model(fake_imgs.clone()))  # wgan loss
-                d_loss.backward(retain_graph=True)
+                d_loss = self.g_loss_fn(self.d_model(real_imgs), self.d_model(fake_imgs))  # wgan loss
+                d_loss.backward()
                 self.d_optimizer.step()
 
                 # 梯度裁剪
@@ -136,7 +140,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--epochs',
                         type=int,
-                        default=100)
+                        default=200)
 
     args = parser.parse_args()
 
