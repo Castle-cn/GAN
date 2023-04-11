@@ -72,7 +72,7 @@ class Model:
                 self.d_model.train()
                 self.g_model.eval()
                 self.d_optimizer.zero_grad()
-                d_loss = self.g_loss_fn(self.d_model(real_imgs), self.d_model(fake_imgs))  # wgan loss
+                d_loss = self.d_loss_fn(self.d_model(real_imgs), self.d_model(fake_imgs))  # wgan loss
                 d_loss.backward()
                 self.d_optimizer.step()
 
