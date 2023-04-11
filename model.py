@@ -11,14 +11,14 @@ class Generator(nn.Module):
 
         self.stack = nn.Sequential(
             nn.Linear(in_dims, 128),
-            nn.BatchNorm1d(128),
-            nn.LeakyReLU(inplace=True),
+            # nn.BatchNorm1d(128),
+            nn.ReLU(inplace=True),
             nn.Linear(128, 256),
-            nn.BatchNorm1d(256),
-            nn.LeakyReLU(inplace=True),
+            # nn.BatchNorm1d(256),
+            nn.ReLU(inplace=True),
             nn.Linear(256, 512),
-            nn.BatchNorm1d(512),
-            nn.LeakyReLU(inplace=True),
+            # nn.BatchNorm1d(512),
+            nn.ReLU(inplace=True),
             nn.Linear(512, np.prod(img_size).item()),
             nn.Tanh()  # 输出在-1到1之间
         )
